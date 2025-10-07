@@ -1,59 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- Chosen Palette: Slate Gray with Sky Blue accents -->
+    <!-- Application Structure Plan: A 3-screen SPA flow (Home -> Form -> Editor/Preview). This task-oriented structure guides the user logically from start to finish. Key interactions include live preview updates on form input and dynamic template/color switching in the editor. This was chosen over a single dashboard to reduce cognitive load and create a clear, step-by-step process for the user. The final step includes a sophisticated multi-page PDF generation feature. -->
+    <!-- Visualization & Content Choices: 
+        - User Info -> Goal: Data Input -> Presentation: HTML Form -> Interaction: Standard inputs, dynamic add/remove buttons -> Justification: Standard and effective method for data collection.
+        - Templates -> Goal: Style Selection -> Presentation: Visual grid of thumbnail-like divs -> Interaction: Click to select -> Justification: Visual selection is more intuitive than a dropdown for design choices.
+        - Color Themes -> Goal: Personalization -> Presentation: Row of colored dots -> Interaction: Click to select -> Justification: Simple and visual way to apply branding.
+        - CV Preview -> Goal: Real-time Feedback -> Presentation: Rendered HTML within a fixed A4-sized div -> Interaction: Dynamically updated via JS on form input or template change -> Justification: Provides immediate visual confirmation of user's choices.
+        - PDF Export -> Goal: Final Output -> Presentation: Button -> Interaction: Click -> Justification: Core functionality of the app. Library/Method: Switched to jsPDF's native .html() method which uses html2canvas internally but manages page breaks automatically, preventing content from being cut across pages.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Currículos PRO - por Tiago Pinheiro</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Teko:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
     
-    <!-- PDF Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- PWA Configuration -->
-    <meta name="theme-color" content="#111827">
-    <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Gerador de Currículos PRO&quot;,&quot;short_name&quot;:&quot;CV PRO&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111827&quot;,&quot;theme_color&quot;:&quot;#111827&quot;,&quot;description&quot;:&quot;Crie seu currículo profissional de forma fácil e rápida.&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://placehold.co/192x192/111827/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;},{&quot;src&quot;:&quot;https://placehold.co/512x512/111827/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
-    <link rel="apple-touch-icon" href="https://placehold.co/180x180/111827/FFFFFF?text=CV">
+    <meta name="theme-color" content="#1f2937">
+    <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Gerador de Currículos PRO&quot;,&quot;short_name&quot;:&quot;CV PRO&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111827&quot;,&quot;theme_color&quot;:&quot;#1f2937&quot;,&quot;description&quot;:&quot;Crie seu currículo profissional de forma fácil e rápida.&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://placehold.co/192x192/1f2937/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;},{&quot;src&quot;:&quot;https://placehold.co/512x512/1f2937/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/1f2937/FFFFFF?text=CV">
 
     <style>
-        body { font-family: 'Roboto', sans-serif; }
-        .font-display { font-family: 'Teko', sans-serif; }
-        .step-indicator.active { background-color: #3b82f6; color: white; }
-        .template-card { transition: transform 0.2s, box-shadow 0.2s; }
-        .template-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1); }
-        .template-card.selected { border-color: #3b82f6; transform: scale(1.05); box-shadow: 0 0 0 3px #3b82f6; }
-        #cv-preview-area { box-shadow: 0 0 30px rgba(0,0,0,0.5); transform-origin: top center; }
-        .page-break { page-break-after: always; }
-        .cv-body::-webkit-scrollbar { width: 5px; }
-        .cv-body::-webkit-scrollbar-track { background: #f1f1f1; }
-        .cv-body::-webkit-scrollbar-thumb { background: #888; }
-        .cv-body::-webkit-scrollbar-thumb:hover { background: #555; }
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        .font-title { font-family: 'Montserrat', sans-serif; }
+        .screen { display: none; }
+        .active-screen { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
         .form-input {
-            width: 100%;
-            padding: 0.5rem;
-            background-color: #374151; /* gray-700 */
-            border-radius: 0.375rem;
-            border: 1px solid #4b5563; /* gray-600 */
+            width: 100%; padding: 0.75rem; background-color: #374151;
+            border-radius: 0.5rem; border: 1px solid #4b5563; color: white;
+            transition: all 0.2s ease-in-out;
         }
         .form-input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px #3b82f6; /* blue-500 */
+            outline: none; box-shadow: 0 0 0 2px #3b82f6; border-color: #3b82f6;
+        }
+        #cv-preview-area {
+            width: 210mm;
+            min-height: 297mm;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .template-selector-card, .color-selector-dot {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .template-selector-card:hover { border-color: #3b82f6; }
+        .template-selector-card.selected {
             border-color: #3b82f6;
+            box-shadow: 0 0 0 3px #3b82f6;
+        }
+        .color-selector-dot.selected {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 3px white;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #2563eb;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="text-gray-200">
 
-    <!-- About Modal -->
-    <div id="about-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-gray-800 rounded-lg shadow-xl p-8 max-w-2xl w-full relative">
+    <div id="about-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-8 max-w-2xl w-full relative border border-gray-700">
             <button onclick="toggleAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
             <h2 class="text-3xl font-bold text-blue-400 mb-4">Sobre o Desenvolvedor</h2>
             <p class="text-gray-300 mb-6">Este Gerador de Currículos foi criado por Tiago Pinheiro como um projeto para demonstrar habilidades em desenvolvimento web front-end, incluindo HTML, JavaScript e design responsivo com Tailwind CSS.</p>
@@ -63,40 +88,22 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="container mx-auto p-4 md:p-8">
+    <div id="app" class="container mx-auto p-4 md:p-8">
         
-        <header class="text-center mb-8">
-            <h1 class="text-5xl md:text-6xl font-display font-bold text-blue-400">Gerador de Currículos <span class="text-white">PRO</span></h1>
-            <p class="text-gray-400 mt-2">Crie seu currículo profissional em 3 passos simples.</p>
-        </header>
-
-        <!-- Step Indicators -->
-        <div class="flex justify-center items-center space-x-2 md:space-x-4 mb-8">
-            <div id="step-1-indicator" class="step-indicator w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center font-bold text-xl transition-colors active">1</div>
-            <div class="flex-1 h-1 bg-gray-700 rounded"></div>
-            <div id="step-2-indicator" class="step-indicator w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center font-bold text-xl transition-colors">2</div>
-            <div class="flex-1 h-1 bg-gray-700 rounded"></div>
-            <div id="step-3-indicator" class="step-indicator w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center font-bold text-xl transition-colors">3</div>
-        </div>
-
-        <!-- Step 1: Template Selection -->
-        <section id="step-1">
-            <h2 class="text-3xl font-bold text-center mb-6">1. Escolha um Template</h2>
-            <div id="template-gallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                <!-- Templates will be injected by JS -->
-            </div>
-            <div class="text-center mt-8">
-                <button id="step1-next" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>Próximo</button>
+        <section id="home-screen" class="active-screen">
+            <div class="text-center min-h-[80vh] flex flex-col items-center justify-center">
+                <h1 class="text-5xl md:text-7xl font-title font-bold text-white">Gerador de Currículos <span class="text-blue-400">PRO</span></h1>
+                <p class="text-gray-400 mt-4 text-xl max-w-2xl">Crie um currículo profissional e impactante em minutos, com templates modernos e a opção de download em PDF.</p>
+                <button onclick="showScreen('form-screen')" class="mt-12 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-10 rounded-lg transition-transform hover:scale-105 text-lg">
+                    Iniciar Criação
+                </button>
             </div>
         </section>
 
-        <!-- Step 2: Form -->
-        <section id="step-2" class="hidden">
-            <h2 class="text-3xl font-bold text-center mb-6">2. Preencha seus Dados</h2>
-            <div id="cv-form" class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+        <section id="form-screen" class="screen">
+            <h2 class="text-4xl font-bold text-center mb-8 font-title text-white">Preencha seus Dados</h2>
+            <div class="bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg max-w-4xl mx-auto border border-gray-700">
                  <form id="main-form">
-                    <!-- Personal Info -->
                     <div class="border-b border-gray-700 pb-6 mb-6">
                         <h3 class="text-xl font-bold text-blue-400 mb-4">Informações Pessoais</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,55 +114,68 @@
                             <input type="text" id="linkedin" placeholder="Link do LinkedIn (URL)" class="form-input">
                             <input type="text" id="location" placeholder="Cidade, Estado" class="form-input">
                         </div>
-                        <textarea id="summary" placeholder="Resumo profissional sobre você..." rows="4" class="w-full mt-4 p-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        <div class="mt-4">
+                            <label for="photo" class="text-sm text-gray-400">Foto (opcional, para templates específicos):</label>
+                            <input type="file" id="photo" class="form-input mt-1" accept="image/*">
+                        </div>
+                        <textarea id="summary" placeholder="Resumo profissional sobre você..." rows="4" class="w-full mt-4 p-3 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
-                    <!-- Experience -->
                     <div id="experience-section" class="border-b border-gray-700 pb-6 mb-6">
                         <h3 class="text-xl font-bold text-blue-400 mb-4">Experiência Profissional</h3>
-                        <div id="experience-entries"></div>
-                        <button type="button" id="add-experience" class="mt-2 bg-blue-500 hover:bg-blue-600 text-sm py-1 px-3 rounded">Adicionar Experiência</button>
+                        <div id="experience-entries" class="space-y-4"></div>
+                        <button type="button" id="add-experience" class="mt-4 bg-blue-500 hover:bg-blue-600 text-sm py-2 px-4 rounded-lg">Adicionar Experiência</button>
                     </div>
-                    <!-- Education -->
                     <div id="education-section" class="border-b border-gray-700 pb-6 mb-6">
                         <h3 class="text-xl font-bold text-blue-400 mb-4">Formação Acadêmica</h3>
-                        <div id="education-entries"></div>
-                        <button type="button" id="add-education" class="mt-2 bg-blue-500 hover:bg-blue-600 text-sm py-1 px-3 rounded">Adicionar Formação</button>
+                        <div id="education-entries" class="space-y-4"></div>
+                        <button type="button" id="add-education" class="mt-4 bg-blue-500 hover:bg-blue-600 text-sm py-2 px-4 rounded-lg">Adicionar Formação</button>
                     </div>
-                    <!-- Skills -->
                     <div>
                         <h3 class="text-xl font-bold text-blue-400 mb-4">Habilidades</h3>
-                        <textarea id="skills" placeholder="Liste suas habilidades separadas por vírgula (ex: HTML, CSS, JavaScript)" rows="3" class="w-full p-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        <textarea id="skills" placeholder="Liste suas habilidades separadas por vírgula (ex: HTML, CSS, JavaScript)" rows="3" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
                 </form>
             </div>
-            <div class="flex justify-between mt-8">
-                <button onclick="goToStep(1)" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">Voltar</button>
-                <button onclick="goToStep(3)" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">Visualizar</button>
+            <div class="flex justify-center mt-8">
+                <button onclick="showScreen('editor-screen')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg">Avançar para Editor</button>
             </div>
         </section>
-        
-        <!-- Step 3: Preview & Download -->
-        <section id="step-3" class="hidden">
-            <h2 class="text-3xl font-bold text-center mb-6">3. Visualize e Baixe seu Currículo</h2>
-            <div class="flex justify-center mb-8 overflow-x-auto">
-                <div id="cv-preview-container" class="w-full">
-                     <div id="cv-preview-area" class="bg-white text-black p-8 mx-auto" style="width: 210mm; min-height: 297mm;">
-                        <!-- Live preview will be rendered here -->
+
+        <section id="editor-screen" class="screen">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <div class="w-full lg:w-1/3 xl:w-1/4 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 self-start lg:sticky top-8">
+                    <h2 class="text-2xl font-bold mb-4 text-white">Editor</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="font-semibold mb-3 text-blue-400">Layout do Template</h3>
+                            <div id="template-selector" class="grid grid-cols-2 gap-2"></div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-3 text-blue-400">Cor de Destaque</h3>
+                            <div id="color-selector" class="flex space-x-3"></div>
+                        </div>
+                        <div class="pt-6 border-t border-gray-700">
+                             <button onclick="showScreen('form-screen')" class="w-full text-center bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors mb-4">
+                                Editar Informações
+                            </button>
+                            <button id="download-pdf-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
+                                Baixar em PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-2/3 xl:w-3/4">
+                    <div id="cv-preview-container" class="overflow-auto" style="max-height: 85vh;">
+                         <div id="cv-preview-area" class="bg-white text-black mx-auto" style="width: 210mm; min-height: 297mm;">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col md:flex-row justify-center items-center gap-4">
-                <button onclick="goToStep(2)" class="w-full md:w-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">Voltar para Edição</button>
-                <button id="download-pdf-btn" class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
-                    Baixar em PDF
-                </button>
-            </div>
         </section>
-
     </div>
 
-    <!-- Footer -->
     <footer class="text-center p-8 mt-8 border-t border-gray-700">
         <div class="flex justify-between items-center container mx-auto">
             <p class="text-gray-400 text-sm"><i><b>Criado por Tiago Pinheiro</b></i></p>
@@ -164,7 +184,399 @@
     </footer>
     
     <script>
-        // Placeholder for the complete script
+        // ------------------- STATE MANAGEMENT ------------------- //
+        let currentScreen = 'home-screen';
+        let selectedTemplate = 'executive';
+        let selectedColor = 'blue';
+
+        const formData = {
+            name: 'Tiago Pinheiro',
+            role: 'Desenvolvedor Web Front-end',
+            email: 'tiagopinheiro8080@gmail.com',
+            phone: '(99) 99999-9999',
+            linkedin: 'linkedin.com/in/tiagopinheiro8080',
+            location: 'Sua Cidade, Estado',
+            photo: null,
+            summary: 'Desenvolvedor apaixonado por criar interfaces de usuário intuitivas e experiências digitais memoráveis. Sólidos conhecimentos em HTML, CSS, JavaScript e frameworks modernos, com foco em design responsivo e performance. Buscando aplicar minhas habilidades para construir soluções inovadoras e de alta qualidade.',
+            experience: [
+                { title: 'Desenvolvedor Front-end', company: 'Tech Solutions', period: '2022 - Presente', description: 'Desenvolvimento e manutenção de aplicações web interativas usando HTML, CSS e JavaScript. Colaboração em equipes ágeis para entregar projetos dentro do prazo, resultando em um aumento de 15% na satisfação do cliente.' },
+                { title: 'Web Designer (Júnior)', company: 'Creative Minds', period: '2020 - 2022', description: 'Criação de layouts e protótipos para websites institucionais e e-commerces. Responsável pela implementação do design responsivo, garantindo a consistência visual em todos os dispositivos.' }
+            ],
+            education: [
+                { institution: 'Universidade Exemplo', period: '2016 - 2020', description: 'Bacharelado em Ciência da Computação' },
+            ],
+            skills: ['HTML5', 'CSS3', 'Tailwind CSS', 'JavaScript', 'Firebase', 'Git & GitHub', 'Design Responsivo', 'UI/UX Design'],
+        };
+
+        // ------------------- DOM ELEMENTS ------------------- //
+        const screens = {
+            home: document.getElementById('home-screen'),
+            form: document.getElementById('form-screen'),
+            editor: document.getElementById('editor-screen'),
+        };
+        const aboutModal = document.getElementById('about-modal');
+        const previewArea = document.getElementById('cv-preview-area');
+        const form = document.getElementById('main-form');
+        const templateSelector = document.getElementById('template-selector');
+        const colorSelector = document.getElementById('color-selector');
+
+        // ------------------- DATA ------------------- //
+        const templates = [
+            { id: 'executive', name: 'Executivo' },
+            { id: 'creative', name: 'Criativo' },
+            { id: 'timeline', name: 'Cronológico' },
+            { id: 'modern', name: 'Moderno' },
+            { id: 'compact', name: 'Compacto' },
+        ];
+        const colors = {
+            blue: { text: 'text-blue-600', bg: 'bg-blue-600', border: 'border-blue-600', ring: 'ring-blue-600' },
+            green: { text: 'text-emerald-600', bg: 'bg-emerald-600', border: 'border-emerald-600', ring: 'ring-emerald-600' },
+            gray: { text: 'text-slate-600', bg: 'bg-slate-600', border: 'border-slate-600', ring: 'ring-slate-600' },
+            purple: { text: 'text-violet-600', bg: 'bg-violet-600', border: 'border-violet-600', ring: 'ring-violet-600' },
+            orange: { text: 'text-orange-600', bg: 'bg-orange-600', border: 'border-orange-600', ring: 'ring-orange-600' },
+        };
+        
+        // ------------------- NAVIGATION & UI ------------------- //
+        function showScreen(screenId) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active-screen'));
+            screens[screenId.split('-')[0]].classList.add('active-screen');
+            currentScreen = screenId;
+            window.scrollTo(0, 0);
+            if (screenId === 'editor-screen' || screenId === 'form-screen') {
+                populateForm();
+                renderCV();
+            }
+        }
+        
+        function toggleAboutModal() {
+            aboutModal.classList.toggle('hidden');
+        }
+
+        // ------------------- DYNAMIC FORM ENTRIES ------------------- //
+        function addDynamicEntry(type, data = {}) {
+            const container = document.getElementById(`${type}-entries`);
+            const entryIndex = container.children.length;
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-700 rounded-lg relative border border-gray-600';
+            
+            let fields;
+            if (type === 'experience') {
+                fields = `
+                    <input type="text" placeholder="Cargo" class="form-input md:col-span-2" data-type="${type}" data-index="${entryIndex}" data-key="title" value="${data.title || ''}">
+                    <input type="text" placeholder="Empresa" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="company" value="${data.company || ''}">
+                    <input type="text" placeholder="Período (ex: 2020 - 2024)" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="period" value="${data.period || ''}">
+                    <textarea placeholder="Descrição das atividades..." rows="3" class="form-input md:col-span-2" data-type="${type}" data-index="${entryIndex}" data-key="description">${data.description || ''}</textarea>
+                `;
+            } else { // education
+                fields = `
+                    <input type="text" placeholder="Instituição de Ensino" class="form-input md:col-span-2" data-type="${type}" data-index="${entryIndex}" data-key="institution" value="${data.institution || ''}">
+                    <input type="text" placeholder="Curso ou Formação" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="description" value="${data.description || ''}">
+                    <input type="text" placeholder="Período (ex: 2016 - 2020)" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="period" value="${data.period || ''}">
+                `;
+            }
+
+            entryDiv.innerHTML = `
+                <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 font-bold text-xl" onclick="removeDynamicEntry(this)">&times;</button>
+                ${fields}
+            `;
+            container.appendChild(entryDiv);
+        }
+
+        function removeDynamicEntry(button) {
+            button.parentElement.remove();
+            renderCV();
+        }
+
+        // ------------------- FORM & DATA HANDLING ------------------- //
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                formData.photo = null;
+                renderCV();
+                return;
+            };
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                formData.photo = reader.result;
+                renderCV();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function gatherFormData() {
+            const data = {};
+            document.querySelectorAll('#main-form [id]').forEach(input => {
+                if (input.type !== 'file' && input.id) data[input.id] = input.value;
+            });
+            data.skills = data.skills.split(',').map(s => s.trim()).filter(s => s);
+            
+            ['experience', 'education'].forEach(type => {
+                data[type] = [];
+                document.querySelectorAll(`#${type}-entries > div`).forEach(div => {
+                    const entry = {};
+                    div.querySelectorAll('input, textarea').forEach(input => {
+                        entry[input.dataset.key] = input.value;
+                    });
+                    data[type].push(entry);
+                });
+            });
+            Object.assign(formData, data);
+        }
+
+        function populateForm() {
+            Object.keys(formData).forEach(key => {
+                const element = document.getElementById(key);
+                if (element && key !== 'photo') {
+                    if (key === 'skills') {
+                        element.value = formData.skills.join(', ');
+                    } else {
+                        element.value = formData[key];
+                    }
+                }
+            });
+
+            ['experience', 'education'].forEach(type => {
+                document.getElementById(`${type}-entries`).innerHTML = '';
+                formData[type].forEach(entryData => addDynamicEntry(type, entryData));
+            });
+        }
+        
+        // ------------------- CV RENDERING LOGIC ------------------- //
+        function renderCV() {
+            gatherFormData();
+            const data = formData;
+            const theme = colors[selectedColor];
+            let html = '';
+
+            const section = (title, content, titleClasses = `text-sm font-bold ${theme.text} tracking-wider uppercase pb-2 mb-2 border-b-2 ${theme.border}`) => {
+                const hasContent = content && content.replace(/<[^>]*>/g, '').trim().length > 0;
+                if (!hasContent || (Array.isArray(content) && content.length === 0)) return '';
+                return `<div class="mt-6" style="page-break-inside: avoid;"><h2 class="${titleClasses}">${title}</h2><div class="mt-2">${content}</div></div>`;
+            };
+
+            const expHtml = (itemClass = '') => data.experience.map(exp => `
+                <div class="${itemClass}" style="page-break-inside: avoid;">
+                    <h3 class="font-bold text-md text-gray-800">${exp.title || ''}</h3>
+                    <div class="flex justify-between text-sm text-gray-500 italic">
+                        <span>${exp.company || ''}</span>
+                        <span>${exp.period || ''}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-1">${exp.description || ''}</p>
+                </div>
+            `).join('');
+
+            const eduHtml = (itemClass = '') => data.education.map(edu => `
+                <div class="${itemClass}" style="page-break-inside: avoid;">
+                    <h3 class="font-bold text-md text-gray-800">${edu.description || ''}</h3>
+                    <div class="flex justify-between text-sm text-gray-500 italic">
+                        <span>${edu.institution || ''}</span>
+                        <span>${edu.period || ''}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            const skillsHtml = `<div class="flex flex-wrap gap-2">${data.skills.map(skill => `<span class="bg-gray-200 text-gray-700 text-sm font-semibold px-3 py-1 rounded-full">${skill}</span>`).join('')}</div>`;
+
+            switch (selectedTemplate) {
+                case 'executive':
+                    html = `
+                        <div class="flex h-full text-sm">
+                            <div class="w-1/3 p-8 text-white" style="background-color: #2d3748;">
+                                <h1 class="text-3xl font-bold leading-tight">${data.name}</h1>
+                                <p class="text-lg ${theme.text} -mt-1">${data.role}</p>
+                                <div class="mt-8 border-t border-gray-500 pt-6">
+                                    <h2 class="text-sm font-bold uppercase tracking-widest">Contato</h2>
+                                    <p class="text-xs mt-2 break-all">${data.email}</p>
+                                    <p class="text-xs mt-1">${data.phone}</p>
+                                    <p class="text-xs mt-1 break-all">${data.linkedin}</p>
+                                    <p class="text-xs mt-1">${data.location}</p>
+                                </div>
+                                ${section('<span class="text-white">Habilidades</span>', skillsHtml.replaceAll('bg-gray-200 text-gray-700', 'bg-gray-600 text-white'), 'text-sm font-bold text-white tracking-wider uppercase pb-2 mb-2 border-b-2 border-gray-500')}
+                            </div>
+                            <div class="w-2/3 p-8 text-gray-700 bg-white">
+                                ${section('Perfil Profissional', `<p>${data.summary}</p>`)}
+                                ${section('Experiência Profissional', expHtml('mb-4'))}
+                                ${section('Formação Acadêmica', eduHtml('mb-4'))}
+                            </div>
+                        </div>`;
+                    break;
+                case 'modern':
+                     html = `
+                        <div class="p-10 text-gray-800 bg-white text-sm">
+                            <div class="text-center pb-6 border-b-2 ${theme.border}">
+                                <h1 class="text-5xl font-bold tracking-tight">${data.name}</h1>
+                                <p class="text-xl ${theme.text} mt-1">${data.role}</p>
+                            </div>
+                            <div class="flex justify-center text-xs space-x-4 py-3 text-gray-600">
+                                ${data.email && `<span>${data.email}</span>`}
+                                ${data.phone && `<span>• ${data.phone}</span>`}
+                                ${data.linkedin && `<span>• ${data.linkedin}</span>`}
+                                ${data.location && `<span>• ${data.location}</span>`}
+                            </div>
+                            <div class="text-center">
+                                ${section('Resumo', `<p class="text-center max-w-2xl mx-auto">${data.summary}</p>`)}
+                            </div>
+                            ${section('Experiência', expHtml('mb-4'))}
+                            ${section('Formação', eduHtml('mb-4'))}
+                            ${section('Habilidades', skillsHtml)}
+                        </div>`;
+                    break;
+                case 'timeline':
+                     html = `
+                        <div class="p-10 bg-white text-sm">
+                            <header class="relative text-center pb-8 mb-8">
+                                <h1 class="text-4xl font-bold text-gray-800">${data.name}</h1>
+                                <p class="text-lg font-semibold ${theme.text}">${data.role}</p>
+                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-0.5 ${theme.bg}"></div>
+                            </header>
+                            <div class="grid grid-cols-3 gap-8">
+                                <div class="col-span-1">
+                                    ${section('Contato', `<p>${data.email}</p><p>${data.phone}</p><p>${data.linkedin}</p><p>${data.location}</p>`)}
+                                    ${section('Habilidades', skillsHtml)}
+                                </div>
+                                <div class="col-span-2">
+                                    ${section('Perfil', `<p>${data.summary}</p>`)}
+                                    ${section('Experiência', data.experience.map(exp => `
+                                        <div class="mb-4 relative pl-6" style="page-break-inside: avoid;">
+                                            <div class="absolute left-0 top-1.5 h-full w-0.5 ${theme.bg} opacity-30"></div>
+                                            <div class="absolute left-[-5px] top-1.5 w-3 h-3 rounded-full ${theme.bg}"></div>
+                                            <p class="text-xs text-gray-500">${exp.period}</p>
+                                            <h3 class="font-bold text-sm text-gray-800">${exp.title} at ${exp.company}</h3>
+                                            <p class="text-xs text-gray-600 mt-1">${exp.description}</p>
+                                        </div>`).join(''))}
+                                    ${section('Formação', eduHtml())}
+                                </div>
+                            </div>
+                        </div>`;
+                    break;
+                case 'creative':
+                    const photoHtml = data.photo
+                        ? `<img src="${data.photo}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-md">`
+                        : `<div class="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center text-gray-500 text-xs text-center p-2">Selecione uma foto no formulário</div>`;
+
+                    html = `
+                        <div class="p-10 bg-white text-gray-800 text-sm">
+                             <div class="grid grid-cols-12 gap-8">
+                                <div class="col-span-4">
+                                    ${photoHtml}
+                                    ${section('Contato', `<p>${data.email}</p><p>${data.phone}</p><p>${data.linkedin}</p><p>${data.location}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                                    ${section('Habilidades', skillsHtml, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                                </div>
+                                <div class="col-span-8">
+                                    <h1 class="text-5xl font-bold">${data.name}</h1>
+                                    <p class="text-xl font-semibold text-gray-500">${data.role}</p>
+                                    <div class="w-full h-1 ${theme.bg} my-4"></div>
+                                    ${section('Perfil', `<p>${data.summary}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                                    ${section('Experiência', expHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                                    ${section('Formação', eduHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                                </div>
+                            </div>
+                        </div>`;
+                    break;
+                case 'compact':
+                default:
+                    html = `
+                        <div class="p-8 text-gray-800 bg-gray-50 text-sm">
+                            <div class="grid grid-cols-12 gap-8">
+                                <div class="col-span-8 border-r pr-8 border-gray-200">
+                                    <h1 class="text-4xl font-bold">${data.name}</h1>
+                                    <p class="text-lg font-semibold ${theme.text}">${data.role}</p>
+                                    ${section('Resumo Profissional', `<p>${data.summary}</p>`)}
+                                    ${section('Experiência', expHtml('mb-4'))}
+                                </div>
+                                <div class="col-span-4">
+                                     ${section('Contato', `<p>${data.email}</p><p>${data.phone}</p><p>${data.linkedin}</p><p>${data.location}</p>`)}
+                                     ${section('Formação', eduHtml('mb-2'))}
+                                     ${section('Habilidades', skillsHtml)}
+                                </div>
+                            </div>
+                        </div>`;
+                    break;
+            }
+            previewArea.innerHTML = html;
+        }
+
+
+        // PDF GENERATION (UPDATED LOGIC)
+        document.getElementById('download-pdf-btn').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const cv = document.getElementById('cv-preview-area');
+            const btn = document.getElementById('download-pdf-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Gerando...';
+            btn.disabled = true;
+
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4',
+                putOnlyUsedFonts: true,
+                floatPrecision: 16
+            });
+
+            pdf.html(cv, {
+                callback: function (doc) {
+                    doc.save(`${formData.name.replace(/\s+/g, '_')}_curriculo.pdf`);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                x: 0,
+                y: 0,
+                width: 210, // A4 width in mm
+                windowWidth: cv.scrollWidth,
+                autoPaging: 'text'
+            });
+        });
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            // Populate template selector
+            templates.forEach(template => {
+                const card = document.createElement('div');
+                card.className = 'template-selector-card bg-gray-700 p-2 rounded-lg border-2 border-gray-600';
+                card.dataset.templateId = template.id;
+                card.innerHTML = `<div class="h-16 flex items-center justify-center text-gray-300 text-center text-sm">${template.name}</div>`;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.template-selector-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedTemplate = card.dataset.templateId;
+                    renderCV();
+                });
+                templateSelector.appendChild(card);
+            });
+            
+            // Populate color selector
+            Object.keys(colors).forEach(colorName => {
+                const dot = document.createElement('div');
+                dot.className = `color-selector-dot w-8 h-8 rounded-full ${colors[colorName].bg} border-2 border-gray-800`;
+                dot.dataset.colorId = colorName;
+                dot.addEventListener('click', () => {
+                    document.querySelectorAll('.color-selector-dot').forEach(d => d.classList.remove('selected'));
+                    dot.classList.add('selected');
+                    selectedColor = dot.dataset.colorId;
+                    renderCV();
+                });
+                colorSelector.appendChild(dot);
+            });
+            
+            // Set default selections
+            document.querySelector(`.template-selector-card[data-template-id="${selectedTemplate}"]`).classList.add('selected');
+            document.querySelector(`.color-selector-dot[data-color-id="${selectedColor}"]`).classList.add('selected');
+
+            // Add initial form entries with placeholder data
+            formData.experience.forEach(exp => addDynamicEntry('experience', exp));
+            formData.education.forEach(edu => addDynamicEntry('education', edu));
+
+            // Form listeners
+            form.addEventListener('input', renderCV);
+            document.getElementById('add-experience').addEventListener('click', () => addDynamicEntry('experience'));
+            document.getElementById('add-education').addEventListener('click', () => addDynamicEntry('education'));
+            document.getElementById('photo').addEventListener('change', handlePhotoUpload);
+        
+            populateForm();
+            showScreen('home-screen');
+        });
     </script>
 </body>
 </html>
