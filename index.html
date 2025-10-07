@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Currículos PRO - por Tiago Pinheiro</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Teko:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- PWA Configuration -->
+    <meta name="theme-color" content="#111827">
+    <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Gerador de Currículos PRO&quot;,&quot;short_name&quot;:&quot;CV PRO&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111827&quot;,&quot;theme_color&quot;:&quot;#111827&quot;,&quot;description&quot;:&quot;Crie seu currículo profissional de forma fácil e rápida.&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://placehold.co/192x192/111827/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;},{&quot;src&quot;:&quot;https://placehold.co/512x512/111827/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/111827/FFFFFF?text=CV">
+
+    <style>
+        body { font-family: 'Roboto', sans-serif; }
+        .font-display { font-family: 'Teko', sans-serif; }
+        .step-indicator.active { background-color: #3b82f6; color: white; }
+        .template-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .template-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1); }
+        .template-card.selected { border-color: #3b82f6; transform: scale(1.05); box-shadow: 0 0 0 3px #3b82f6; }
+        #cv-preview-area { box-shadow: 0 0 30px rgba(0,0,0,0.5); transform-origin: top center; }
+        .page-break { page-break-after: always; }
+        .cv-body::-webkit-scrollbar { width: 5px; }
+        .cv-body::-webkit-scrollbar-track { background: #f1f1f1; }
+        .cv-body::-webkit-scrollbar-thumb { background: #888; }
+        .cv-body::-webkit-scrollbar-thumb:hover { background: #555; }
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #374151; /* gray-700 */
+            border-radius: 0.375rem;
+            border: 1px solid #4b5563; /* gray-600 */
+        }
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #3b82f6; /* blue-500 */
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- About Modal -->
+    <div id="about-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-8 max-w-2xl w-full relative">
+            <button onclick="toggleAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            <h2 class="text-3xl font-bold text-blue-400 mb-4">Sobre o Desenvolvedor</h2>
+            <p class="text-gray-300 mb-6">Este Gerador de Currículos foi criado por Tiago Pinheiro como um projeto para demonstrar habilidades em desenvolvimento web front-end, incluindo HTML, JavaScript e design responsivo com Tailwind CSS.</p>
+            <a href="https://tiagopinheiro8080.github.io/" target="_blank" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">
+                Ver Portfólio Completo
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-5xl md:text-6xl font-display font-bold text-blue-400">Gerador de Currículos <span class="text-white">PRO</span></h1>
+            <p class="text-gray-400 mt-2">Crie seu currículo profissional em 3 passos simples.</p>
+        </header>
+
+        <!-- Step Indicators -->
+        <div class="flex justify-center items-center space-x-2 md:space-x-4 mb-8">
+            <div id="step-1-indicator" class="step-indicator w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center font-bold text-xl transition-colors active">1</div>
+            <div class="flex-1 h-1 bg-gray-700 rounded"></div>
+            <div id="step-2-indicator" class="step-indicator w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center font-bold text-xl transition-colors">2</div>
+            <div class="flex-1 h-1 bg-gray-700 rounded"></div>
+            <div id="step-3-indicator" class="step-indicator w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 flex items-center justify-center font-bold text-xl transition-colors">3</div>
+        </div>
+
+        <!-- Step 1: Template Selection -->
+        <section id="step-1">
+            <h2 class="text-3xl font-bold text-center mb-6">1. Escolha um Template</h2>
+            <div id="template-gallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+                <!-- Templates will be injected by JS -->
+            </div>
+            <div class="text-center mt-8">
+                <button id="step1-next" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed" disabled>Próximo</button>
+            </div>
+        </section>
+
+        <!-- Step 2: Form -->
+        <section id="step-2" class="hidden">
+            <h2 class="text-3xl font-bold text-center mb-6">2. Preencha seus Dados</h2>
+            <div id="cv-form" class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+                 <form id="main-form">
+                    <!-- Personal Info -->
+                    <div class="border-b border-gray-700 pb-6 mb-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-4">Informações Pessoais</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="name" placeholder="Nome Completo" class="form-input">
+                            <input type="text" id="role" placeholder="Cargo Desejado" class="form-input">
+                            <input type="email" id="email" placeholder="Email" class="form-input">
+                            <input type="tel" id="phone" placeholder="Telefone" class="form-input">
+                            <input type="text" id="linkedin" placeholder="Link do LinkedIn (URL)" class="form-input">
+                            <input type="text" id="location" placeholder="Cidade, Estado" class="form-input">
+                        </div>
+                        <textarea id="summary" placeholder="Resumo profissional sobre você..." rows="4" class="w-full mt-4 p-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <!-- Experience -->
+                    <div id="experience-section" class="border-b border-gray-700 pb-6 mb-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-4">Experiência Profissional</h3>
+                        <div id="experience-entries"></div>
+                        <button type="button" id="add-experience" class="mt-2 bg-blue-500 hover:bg-blue-600 text-sm py-1 px-3 rounded">Adicionar Experiência</button>
+                    </div>
+                    <!-- Education -->
+                    <div id="education-section" class="border-b border-gray-700 pb-6 mb-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-4">Formação Acadêmica</h3>
+                        <div id="education-entries"></div>
+                        <button type="button" id="add-education" class="mt-2 bg-blue-500 hover:bg-blue-600 text-sm py-1 px-3 rounded">Adicionar Formação</button>
+                    </div>
+                    <!-- Skills -->
+                    <div>
+                        <h3 class="text-xl font-bold text-blue-400 mb-4">Habilidades</h3>
+                        <textarea id="skills" placeholder="Liste suas habilidades separadas por vírgula (ex: HTML, CSS, JavaScript)" rows="3" class="w-full p-2 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-between mt-8">
+                <button onclick="goToStep(1)" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">Voltar</button>
+                <button onclick="goToStep(3)" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">Visualizar</button>
+            </div>
+        </section>
+        
+        <!-- Step 3: Preview & Download -->
+        <section id="step-3" class="hidden">
+            <h2 class="text-3xl font-bold text-center mb-6">3. Visualize e Baixe seu Currículo</h2>
+            <div class="flex justify-center mb-8 overflow-x-auto">
+                <div id="cv-preview-container" class="w-full">
+                     <div id="cv-preview-area" class="bg-white text-black p-8 mx-auto" style="width: 210mm; min-height: 297mm;">
+                        <!-- Live preview will be rendered here -->
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+                <button onclick="goToStep(2)" class="w-full md:w-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">Voltar para Edição</button>
+                <button id="download-pdf-btn" class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
+                    Baixar em PDF
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center p-8 mt-8 border-t border-gray-700">
+        <div class="flex justify-between items-center container mx-auto">
+            <p class="text-gray-400 text-sm"><i><b>Criado por Tiago Pinheiro</b></i></p>
+            <button onclick="toggleAboutModal()" class="text-gray-400 hover:text-blue-400 transition-colors">Sobre</button>
+        </div>
+    </footer>
+    
+    <script>
+        // Placeholder for the complete script
+    </script>
+</body>
+</html>
+
