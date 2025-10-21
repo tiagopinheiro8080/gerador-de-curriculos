@@ -1,572 +1,860 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Currículos PRO - por Tiago Pinheiro</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Gerador de Currículos PRO - Tiago Pinheiro</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
-    
-    <!-- PDF Generation Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" xintegrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet"/>
 
-    <!-- PWA Configuration -->
-    <meta name="theme-color" content="#1f2937">
-    <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Gerador de Currículos PRO&quot;,&quot;short_name&quot;:&quot;CV PRO&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111827&quot;,&quot;theme_color&quot;:&quot;#1f2937&quot;,&quot;description&quot;:&quot;Crie seu currículo profissional de forma fácil e rápida.&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://placehold.co/192x192/1f2937/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;},{&quot;src&quot;:&quot;https://placehold.co/512x512/1f2937/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
-    <link rel="apple-touch-icon" href="https://placehold.co/180x180/1f2937/FFFFFF?text=CV">
+  <!-- Leitura de PDF / DOCX e PDF final -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111827; }
-        .font-title { font-family: 'Montserrat', sans-serif; }
-        .screen { display: none; }
-        .active-screen { display: block; animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .form-input {
-            width: 100%; padding: 0.75rem; background-color: #374151;
-            border-radius: 0.5rem; border: 1px solid #4b5563; color: white;
-            transition: all 0.2s ease-in-out;
-        }
-        .form-input:focus {
-            outline: none; box-shadow: 0 0 0 2px #3b82f6; border-color: #3b82f6;
-        }
-        #cv-preview-area {
-            width: 210mm;
-            min-height: 297mm;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .template-selector-card, .color-selector-dot {
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-        .template-selector-card:hover { border-color: #3b82f6; }
-        .template-selector-card.selected {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px #3b82f6;
-        }
-        .color-selector-dot.selected {
-            transform: scale(1.2);
-            box-shadow: 0 0 0 3px white;
-        }
-        input[type="file"]::file-selector-button {
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        input[type="file"]::file-selector-button:hover {
-            background-color: #2563eb;
-        }
-    </style>
+  <meta name="theme-color" content="#0b1220" />
+
+  <style>
+    :root{
+      --bg-1:#0b1220;
+      --glass:#111827cc;
+      --glass-border:#ffffff1a;
+    }
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:
+        radial-gradient(1000px 500px at -10% -10%, rgba(59,130,246,.15), transparent 60%),
+        radial-gradient(900px 480px at 110% 0%, rgba(16,185,129,.12), transparent 65%),
+        linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+      color:#e5e7eb;
+      min-height:100vh;
+    }
+    .font-title{ font-family:'Montserrat', sans-serif; }
+    .screen{ display:none; }
+    .active-screen{ display:block; animation:fade .4s ease; }
+    @keyframes fade{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+    .glass{ background:var(--glass); border:1px solid var(--glass-border); backdrop-filter: blur(10px); }
+    #cv-preview-area{ width:210mm; min-height:297mm; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+    .template-selector-card{ cursor:pointer; transition:.2s; border:1px solid #334155; background:#0f172acc; border-radius: .75rem; padding:.6rem; }
+    .template-selector-card:hover{ transform: translateY(-2px); }
+    .template-selector-card.selected{ outline:2px solid #3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,.25); }
+    .color-selector-dot{ cursor:pointer; transition:.2s; border:2px solid #0b1220; width:34px; height:34px; border-radius:999px; }
+    .color-selector-dot.selected{ transform:scale(1.15); box-shadow:0 0 0 3px white; }
+    .form-input{
+      width:100%; padding:.75rem .85rem; background:#0b1528; border:1px solid #263142;
+      border-radius:.75rem; color:#e5e7eb; transition:.2s; outline:none;
+    }
+    .form-input:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
+    .thumb{
+      background:#0b1528; border-radius:.5rem; padding:.5rem; display:grid; gap:.25rem; grid-template-rows: repeat(3, 10px) 1px repeat(3, 8px);
+    }
+    .thumb .bar{ height:8px; background:#1f2937; border-radius:3px; }
+    .thumb .title{ height:12px; width:70%; background:#334155; border-radius:3px; }
+    .thumb .rule{ height:1px; background:#334155; margin:.2rem 0; opacity:.7 }
+    .thumb .chip{ height:8px; width:35%; background:#374151; border-radius:999px }
+    @media print{ body{background:#fff} #cv-preview-area{box-shadow:none} }
+  </style>
 </head>
-<body class="text-gray-200">
+<body>
 
-    <div id="about-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-gray-800 rounded-lg shadow-xl p-8 max-w-2xl w-full relative border border-gray-700">
-            <button onclick="toggleAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
-            <h2 class="text-3xl font-bold text-blue-400 mb-4">Sobre o Desenvolvedor</h2>
-            <p class="text-gray-300 mb-6">Este Gerador de Currículos foi criado por Tiago Pinheiro como um projeto para demonstrar habilidades em desenvolvimento web front-end, incluindo HTML, JavaScript e design responsivo com Tailwind CSS.</p>
-            <a href="https://tiagopinheiro8080.github.io/" target="_blank" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">
-                Ver Portfólio Completo
-            </a>
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40">
+    <div class="backdrop-blur-lg bg-black/30 border-b border-white/10">
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <a class="flex items-center gap-2" href="#">
+          <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-emerald-500 text-white font-bold">CV</span>
+          <span class="font-title font-bold text-white">Gerador PRO</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <button onclick="toggleAboutModal()" class="text-sm text-gray-300 hover:text-white transition">Sobre</button>
+          <a href="https://tiagopinheiro8080.github.io/" target="_blank" class="hidden sm:inline-flex text-sm px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/15 border border-white/10">Portfólio</a>
         </div>
+      </nav>
     </div>
+  </header>
 
-    <div id="app" class="container mx-auto p-4 md:p-8">
-        
-        <section id="home-screen" class="active-screen">
-            <div class="text-center min-h-[80vh] flex flex-col items-center justify-center">
-                <h1 class="text-5xl md:text-7xl font-title font-bold text-white">Gerador de Currículos <span class="text-blue-400">PRO</span></h1>
-                <p class="text-gray-400 mt-4 text-xl max-w-2xl">Crie um currículo profissional e impactante em minutos, com templates modernos e a opção de download em PDF.</p>
-                <button onclick="showScreen('form-screen')" class="mt-12 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-10 rounded-lg transition-transform hover:scale-105 text-lg">
-                    Iniciar Criação
-                </button>
-            </div>
-        </section>
-
-        <section id="form-screen" class="screen">
-            <h2 class="text-4xl font-bold text-center mb-8 font-title text-white">Preencha seus Dados</h2>
-            <div class="bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg max-w-4xl mx-auto border border-gray-700">
-                 <form id="main-form">
-                    <div class="border-b border-gray-700 pb-6 mb-6">
-                        <h3 class="text-xl font-bold text-blue-400 mb-4">Informações Pessoais</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="name" placeholder="Nome Completo" class="form-input">
-                            <input type="text" id="role" placeholder="Cargo Desejado" class="form-input">
-                            <input type="email" id="email" placeholder="Email" class="form-input">
-                            <input type="tel" id="phone" placeholder="Telefone" class="form-input">
-                            <input type="text" id="linkedin" placeholder="Link do LinkedIn (URL)" class="form-input">
-                            <input type="text" id="location" placeholder="Cidade, Estado" class="form-input">
-                        </div>
-                        <div class="mt-4">
-                            <label for="photo" class="text-sm text-gray-400">Foto (opcional, para templates específicos):</label>
-                            <input type="file" id="photo" class="form-input mt-1" accept="image/*">
-                        </div>
-                        <textarea id="summary" placeholder="Resumo profissional sobre você..." rows="4" class="w-full mt-4 p-3 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                    </div>
-                    <div id="experience-section" class="border-b border-gray-700 pb-6 mb-6">
-                        <h3 class="text-xl font-bold text-blue-400 mb-4">Experiência Profissional</h3>
-                        <div id="experience-entries" class="space-y-4"></div>
-                        <button type="button" id="add-experience" class="mt-4 bg-blue-500 hover:bg-blue-600 text-sm py-2 px-4 rounded-lg">Adicionar Experiência</button>
-                    </div>
-                    <div id="education-section" class="border-b border-gray-700 pb-6 mb-6">
-                        <h3 class="text-xl font-bold text-blue-400 mb-4">Formação Acadêmica</h3>
-                        <div id="education-entries" class="space-y-4"></div>
-                        <button type="button" id="add-education" class="mt-4 bg-blue-500 hover:bg-blue-600 text-sm py-2 px-4 rounded-lg">Adicionar Formação</button>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-blue-400 mb-4">Habilidades</h3>
-                        <textarea id="skills" placeholder="Liste suas habilidades separadas por vírgula (ex: HTML, CSS, JavaScript)" rows="3" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="flex justify-center mt-8">
-                <button onclick="showScreen('editor-screen')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg">Avançar para Editor</button>
-            </div>
-        </section>
-
-        <section id="editor-screen" class="screen">
-            <div class="flex flex-col lg:flex-row gap-8">
-                <div class="w-full lg:w-1/3 xl:w-1/4 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 self-start lg:sticky top-8">
-                    <h2 class="text-2xl font-bold mb-4 text-white">Editor</h2>
-                    <div class="space-y-6">
-                        <div>
-                            <h3 class="font-semibold mb-3 text-blue-400">Layout do Template</h3>
-                            <div id="template-selector" class="grid grid-cols-2 gap-2"></div>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold mb-3 text-blue-400">Cor de Destaque</h3>
-                            <div id="color-selector" class="flex space-x-3"></div>
-                        </div>
-                        <div class="pt-6 border-t border-gray-700">
-                             <button onclick="showScreen('form-screen')" class="w-full text-center bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors mb-4">
-                                Editar Informações
-                            </button>
-                            <button id="download-pdf-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
-                                Baixar em PDF
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-full lg:w-2/3 xl:w-3/4">
-                    <div id="cv-preview-container" class="overflow-auto" style="max-height: 85vh;">
-                         <div id="cv-preview-area" class="bg-white text-black mx-auto" style="width: 210mm; min-height: 297mm;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <footer class="text-center p-8 mt-8 border-t border-gray-700">
-        <div class="flex justify-between items-center container mx-auto">
-            <p class="text-gray-400 text-sm"><i><b>Criado por Tiago Pinheiro</b></i></p>
-            <button onclick="toggleAboutModal()" class="text-gray-400 hover:text-blue-400 transition-colors">Sobre</button>
+  <main id="app" class="max-w-7xl mx-auto p-4 sm:p-6">
+    <!-- HOME -->
+    <section id="home-screen" class="active-screen">
+      <div class="glass rounded-2xl p-10 md:p-14 text-center">
+        <h1 class="text-4xl md:text-6xl font-title font-bold text-white">Crie seu <span class="text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-emerald-400">Currículo Profissional</span></h1>
+        <p class="max-w-2xl mx-auto text-gray-300 mt-4">Templates modernos, opção de foto, exportação em PDF, importação de PDF/DOCX e salvamento automático.</p>
+        <div class="mt-10 flex items-center justify-center gap-3">
+          <button onclick="showScreen('form-screen')" class="px-6 py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-600 to-emerald-500 hover:opacity-95 transition">Começar agora</button>
+          <button onclick="showScreen('editor-screen'); fillSampleData();" class="px-6 py-3 rounded-xl border border-white/15 text-gray-100 hover:bg-white/10 transition">Ver exemplo</button>
         </div>
-    </footer>
-    
-    <script>
-        // ------------------- STATE MANAGEMENT ------------------- //
-        let currentScreen = 'home-screen';
-        let selectedTemplate = 'executive';
-        let selectedColor = 'blue';
+      </div>
+    </section>
 
-        const formData = {
-            name: '',
-            role: '',
-            email: '',
-            phone: '',
-            linkedin: '',
-            location: '',
-            photo: null,
-            summary: '',
-            experience: [],
-            education: [],
-            skills: [],
-        };
+    <!-- FORM -->
+    <section id="form-screen" class="screen">
+      <div class="glass rounded-2xl p-6 md:p-8">
+        <h2 class="text-3xl font-title font-bold text-white mb-6">Informações Pessoais</h2>
 
-        // ------------------- DOM ELEMENTS ------------------- //
-        const screens = {
-            home: document.getElementById('home-screen'),
-            form: document.getElementById('form-screen'),
-            editor: document.getElementById('editor-screen'),
-        };
-        const aboutModal = document.getElementById('about-modal');
-        const previewArea = document.getElementById('cv-preview-area');
-        const form = document.getElementById('main-form');
-        const templateSelector = document.getElementById('template-selector');
-        const colorSelector = document.getElementById('color-selector');
+        <form id="main-form" class="space-y-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input id="name" type="text" class="form-input" placeholder="Nome Completo" />
+            <input id="role" type="text" class="form-input" placeholder="Cargo Desejado" />
+            <input id="email" type="email" class="form-input" placeholder="Email" />
+            <input id="phone" type="tel" class="form-input" placeholder="Telefone" />
+            <input id="linkedin" type="text" class="form-input" placeholder="Link do LinkedIn (URL)" />
+            <input id="location" type="text" class="form-input" placeholder="Cidade, Estado" />
+          </div>
 
-        // ------------------- DATA ------------------- //
-        const templates = [
-            { id: 'executive', name: 'Executivo' },
-            { id: 'creative', name: 'Criativo' },
-            { id: 'timeline', name: 'Cronológico' },
-            { id: 'modern', name: 'Moderno' },
-            { id: 'compact', name: 'Compacto' },
-        ];
-        const colors = {
-            blue: { text: 'text-blue-600', bg: 'bg-blue-600', border: 'border-blue-600', ring: 'ring-blue-600' },
-            green: { text: 'text-emerald-600', bg: 'bg-emerald-600', border: 'border-emerald-600', ring: 'ring-emerald-600' },
-            gray: { text: 'text-slate-600', bg: 'bg-slate-600', border: 'border-slate-600', ring: 'ring-slate-600' },
-            purple: { text: 'text-violet-600', bg: 'bg-violet-600', border: 'border-violet-600', ring: 'ring-violet-600' },
-            orange: { text: 'text-orange-600', bg: 'bg-orange-600', border: 'border-orange-600', ring: 'ring-orange-600' },
-        };
-        
-        // ------------------- NAVIGATION & UI ------------------- //
-        function showScreen(screenId) {
-            Object.values(screens).forEach(screen => screen.classList.remove('active-screen'));
-            screens[screenId.split('-')[0]].classList.add('active-screen');
-            currentScreen = screenId;
-            window.scrollTo(0, 0);
-            if (screenId === 'editor-screen' || screenId === 'form-screen') {
-                populateForm();
-                renderCV();
-            }
-        }
-        
-        function toggleAboutModal() {
-            aboutModal.classList.toggle('hidden');
-        }
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label for="photo" class="block text-sm text-gray-300 mb-1">Foto (opcional, para templates específicos)</label>
+              <input id="photo" type="file" accept="image/*"
+                     class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" />
+            </div>
 
-        // ------------------- DYNAMIC FORM ENTRIES ------------------- //
-        function addDynamicEntry(type, data = {}) {
-            const container = document.getElementById(`${type}-entries`);
-            const entryIndex = container.children.length;
-            const entryDiv = document.createElement('div');
-            entryDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-700 rounded-lg relative border border-gray-600';
-            
-            let fields;
-            if (type === 'experience') {
-                fields = `
-                    <input type="text" placeholder="Cargo" class="form-input md:col-span-2" data-type="${type}" data-index="${entryIndex}" data-key="title" value="${data.title || ''}">
-                    <input type="text" placeholder="Empresa" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="company" value="${data.company || ''}">
-                    <input type="text" placeholder="Período (ex: 2020 - 2024)" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="period" value="${data.period || ''}">
-                    <textarea placeholder="Descrição das atividades..." rows="3" class="form-input md:col-span-2" data-type="${type}" data-index="${entryIndex}" data-key="description">${data.description || ''}</textarea>
-                `;
-            } else { // education
-                fields = `
-                    <input type="text" placeholder="Instituição de Ensino" class="form-input md:col-span-2" data-type="${type}" data-index="${entryIndex}" data-key="institution" value="${data.institution || ''}">
-                    <input type="text" placeholder="Curso ou Formação" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="description" value="${data.description || ''}">
-                    <input type="text" placeholder="Período (ex: 2016 - 2020)" class="form-input" data-type="${type}" data-index="${entryIndex}" data-key="period" value="${data.period || ''}">
-                `;
-            }
+            <div>
+              <label for="summary" class="block text-sm text-gray-300 mb-1">Resumo profissional</label>
+              <textarea id="summary" rows="4" class="w-full p-4 rounded-xl bg-[#0b1528] border border-[#263142] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Fale brevemente sobre suas principais conquistas e competências..."></textarea>
+            </div>
+          </div>
 
-            entryDiv.innerHTML = `
-                <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 font-bold text-xl" onclick="removeDynamicEntry(this)">&times;</button>
-                ${fields}
-            `;
-            container.appendChild(entryDiv);
-        }
+          <hr class="border-white/10" />
 
-        function removeDynamicEntry(button) {
-            button.parentElement.remove();
-            renderCV();
-        }
+          <div id="experience-section">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-bold text-blue-300">Experiência Profissional</h3>
+              <button type="button" id="add-experience" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">Adicionar</button>
+            </div>
+            <div id="experience-entries" class="space-y-4 mt-4"></div>
+          </div>
 
-        // ------------------- FORM & DATA HANDLING ------------------- //
-        function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if (!file) {
-                formData.photo = null;
-                renderCV();
-                return;
-            };
+          <div id="education-section" class="mt-6">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-bold text-blue-300">Formação Acadêmica</h3>
+              <button type="button" id="add-education" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">Adicionar</button>
+            </div>
+            <div id="education-entries" class="space-y-4 mt-4"></div>
+          </div>
 
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                formData.photo = reader.result;
-                renderCV();
-            };
-            reader.readAsDataURL(file);
-        }
+          <div>
+            <h3 class="text-xl font-bold text-blue-300 mb-2">Habilidades</h3>
+            <textarea id="skills" rows="3" class="w-full p-4 rounded-xl bg-[#0b1528] border border-[#263142] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="HTML, CSS, JavaScript, ..."></textarea>
+          </div>
+        </form>
 
-        function gatherFormData() {
-            const data = {};
-            document.querySelectorAll('#main-form [id]').forEach(input => {
-                if (input.type !== 'file' && input.id) data[input.id] = input.value;
-            });
-            data.skills = data.skills.split(',').map(s => s.trim()).filter(s => s);
-            
-            ['experience', 'education'].forEach(type => {
-                data[type] = [];
-                document.querySelectorAll(`#${type}-entries > div`).forEach(div => {
-                    const entry = {};
-                    div.querySelectorAll('input, textarea').forEach(input => {
-                        entry[input.dataset.key] = input.value;
-                    });
-                    data[type].push(entry);
-                });
-            });
-            Object.assign(formData, data);
-        }
+        <div class="flex flex-wrap gap-3 justify-center mt-6">
+          <button onclick="showScreen('editor-screen')" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">Avançar para Editor</button>
+          <button id="import-resume-btn" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold">📄 Importar Currículo Existente</button>
+          <input type="file" id="resumeImportInput" accept=".pdf,.docx" hidden />
+          <button onclick="fillSampleData()" class="px-6 py-3 rounded-xl border border-white/15 hover:bg-white/10">Preencher Exemplo</button>
+          <button onclick="resetData()" class="px-6 py-3 rounded-xl border border-white/15 hover:bg-white/10">Limpar Dados</button>
+        </div>
+      </div>
+    </section>
 
-        function populateForm() {
-            Object.keys(formData).forEach(key => {
-                const element = document.getElementById(key);
-                if (element && key !== 'photo') {
-                    if (key === 'skills') {
-                        element.value = Array.isArray(formData.skills) ? formData.skills.join(', ') : '';
-                    } else {
-                        element.value = formData[key];
-                    }
-                }
-            });
+    <!-- EDITOR -->
+    <section id="editor-screen" class="screen">
+      <div class="flex flex-col lg:flex-row gap-6 mt-6">
+        <!-- Sidebar -->
+        <aside class="glass rounded-2xl p-6 w-full lg:w-[340px] self-start lg:sticky top-6">
+          <h2 class="text-2xl font-title font-bold mb-3">Editor</h2>
 
-            ['experience', 'education'].forEach(type => {
-                document.getElementById(`${type}-entries`).innerHTML = '';
-                if(Array.isArray(formData[type])) {
-                    formData[type].forEach(entryData => addDynamicEntry(type, entryData));
-                }
-            });
-        }
-        
-        // ------------------- CV RENDERING LOGIC ------------------- //
-        function renderCV() {
-            gatherFormData();
-            const data = formData;
-            const theme = colors[selectedColor];
-            let html = '';
+          <!-- Templates -->
+          <div class="mt-4">
+            <h3 class="text-sm text-blue-300 font-semibold mb-2">Layout do Template</h3>
+            <div id="template-selector" class="grid grid-cols-2 gap-3"></div>
+          </div>
 
-            const section = (title, content, titleClasses = `text-sm font-bold ${theme.text} tracking-wider uppercase pb-2 mb-2 border-b-2 ${theme.border}`) => {
-                const hasContent = content && content.replace(/<[^>]*>/g, '').trim().length > 0;
-                if (!hasContent || (Array.isArray(content) && content.length === 0)) return '';
-                return `<div class="mt-6" style="page-break-inside: avoid;"><h2 class="${titleClasses}">${title}</h2><div class="mt-2">${content}</div></div>`;
-            };
+          <!-- Cores -->
+          <div class="mt-6">
+            <h3 class="text-sm text-blue-300 font-semibold mb-2">Cor de Destaque</h3>
+            <div id="color-selector" class="flex flex-wrap gap-3"></div>
+          </div>
 
-            const expHtml = (itemClass = '') => data.experience.map(exp => `
-                <div class="${itemClass}" style="page-break-inside: avoid;">
-                    <h3 class="font-bold text-md text-gray-800">${exp.title || ''}</h3>
-                    <div class="flex justify-between text-sm text-gray-500 italic">
-                        <span>${exp.company || ''}</span>
-                        <span>${exp.period || ''}</span>
-                    </div>
-                    <p class="text-sm text-gray-700 mt-1">${exp.description || ''}</p>
-                </div>
-            `).join('');
+          <hr class="my-6 border-white/10"/>
 
-            const eduHtml = (itemClass = '') => data.education.map(edu => `
-                <div class="${itemClass}" style="page-break-inside: avoid;">
-                    <h3 class="font-bold text-md text-gray-800">${edu.description || ''}</h3>
-                    <div class="flex justify-between text-sm text-gray-500 italic">
-                        <span>${edu.institution || ''}</span>
-                        <span>${edu.period || ''}</span>
-                    </div>
-                </div>
-            `).join('');
-            
-            const skillsHtml = `<ul class="list-disc list-inside space-y-1">${(Array.isArray(data.skills) ? data.skills : []).map(skill => `<li class="text-sm text-gray-700">${skill}</li>`).join('')}</ul>`;
-            const skillsHtmlDark = `<ul class="list-disc list-inside space-y-1">${(Array.isArray(data.skills) ? data.skills : []).map(skill => `<li class="text-xs text-gray-300">${skill}</li>`).join('')}</ul>`;
+          <div class="space-y-3">
+            <button onclick="showScreen('form-screen')" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Editar Informações</button>
+            <button id="download-pdf-btn" class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold flex items-center justify-center gap-2">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
+              Baixar PDF
+            </button>
+            <button onclick="fillSampleData()" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Preencher Exemplo</button>
+            <button onclick="resetData()" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Limpar Dados</button>
+          </div>
+          <p class="text-xs text-gray-400 mt-4">Dica: seções longas quebram em páginas automaticamente ao exportar.</p>
+        </aside>
 
-            switch (selectedTemplate) {
-                case 'executive':
-                    html = `
-                        <div class="flex h-full text-sm">
-                            <div class="w-1/3 p-8 text-white" style="background-color: #2d3748;">
-                                <h1 class="text-3xl font-bold leading-tight">${data.name}</h1>
-                                <p class="text-lg ${theme.text} mt-1 font-bold">${data.role}</p>
-                                <div class="mt-8 border-t border-gray-500 pt-6">
-                                    <h2 class="text-sm font-bold uppercase tracking-widest">Contato</h2>
-                                    <p class="text-xs mt-2 break-all">${data.email}</p>
-                                    <p class="text-xs mt-1">${data.phone}</p>
-                                    <p class="text-xs mt-1 break-all">${data.linkedin}</p>
-                                    <p class="text-xs mt-1">${data.location}</p>
-                                </div>
-                                ${section('<span class="text-white">Habilidades</span>', skillsHtmlDark, 'text-sm font-bold text-white tracking-wider uppercase pb-2 mb-2 border-b-2 border-gray-500')}
-                            </div>
-                            <div class="w-2/3 p-8 text-gray-700 bg-white">
-                                ${section('Perfil Profissional', `<p>${data.summary}</p>`)}
-                                ${section('Experiência Profissional', expHtml('mb-4'))}
-                                ${section('Formação Acadêmica', eduHtml('mb-4'))}
-                            </div>
-                        </div>`;
-                    break;
-                case 'modern':
-                     html = `
-                        <div class="p-10 text-gray-800 bg-white text-sm">
-                            <div class="text-center pb-6 border-b-2 ${theme.border}">
-                                <h1 class="text-5xl font-bold tracking-tight">${data.name}</h1>
-                                <p class="text-xl ${theme.text} mt-2 font-bold">${data.role}</p>
-                            </div>
-                            <div class="flex justify-center text-xs space-x-4 py-3 text-gray-600">
-                                ${data.email && `<span>${data.email}</span>`}
-                                ${data.phone && `<span>• ${data.phone}</span>`}
-                                ${data.linkedin && `<span>• ${data.linkedin}</span>`}
-                                ${data.location && `<span>• ${data.location}</span>`}
-                            </div>
-                            <div class="text-center">
-                                ${section('Resumo', `<p class="text-center max-w-2xl mx-auto">${data.summary}</p>`)}
-                            </div>
-                            ${section('Experiência', expHtml('mb-4'))}
-                            ${section('Formação', eduHtml('mb-4'))}
-                            ${section('Habilidades', skillsHtml)}
-                        </div>`;
-                    break;
-                case 'timeline':
-                     html = `
-                        <div class="p-10 bg-white text-sm">
-                            <header class="relative text-center pb-8 mb-8">
-                                <h1 class="text-4xl font-bold text-gray-800">${data.name}</h1>
-                                <p class="text-lg font-bold ${theme.text} mt-1">${data.role}</p>
-                                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-0.5 ${theme.bg}"></div>
-                            </header>
-                            <div class="grid grid-cols-3 gap-8">
-                                <div class="col-span-1">
-                                    ${section('Contato', `<p>${data.email}</p><p>${data.phone}</p><p>${data.linkedin}</p><p>${data.location}</p>`)}
-                                    ${section('Habilidades', skillsHtml)}
-                                </div>
-                                <div class="col-span-2">
-                                    ${section('Perfil', `<p>${data.summary}</p>`)}
-                                    ${section('Experiência', data.experience.map(exp => `
-                                        <div class="mb-4 relative pl-6" style="page-break-inside: avoid;">
-                                            <div class="absolute left-0 top-1.5 h-full w-0.5 ${theme.bg} opacity-30"></div>
-                                            <div class="absolute left-[-5px] top-1.5 w-3 h-3 rounded-full ${theme.bg}"></div>
-                                            <p class="text-xs text-gray-500">${exp.period}</p>
-                                            <h3 class="font-bold text-sm text-gray-800">${exp.title} at ${exp.company}</h3>
-                                            <p class="text-xs text-gray-600 mt-1">${exp.description}</p>
-                                        </div>`).join(''))}
-                                    ${section('Formação', eduHtml())}
-                                </div>
-                            </div>
-                        </div>`;
-                    break;
-                case 'creative':
-                    const photoHtml = data.photo
-                        ? `<img src="${data.photo}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-md">`
-                        : `<div class="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center text-gray-500 text-xs text-center p-2">Selecione uma foto no formulário</div>`;
+        <!-- Preview -->
+        <section class="flex-1 glass rounded-2xl p-4">
+          <div id="cv-preview-container" class="overflow-auto" style="max-height:85vh;">
+            <div id="cv-preview-area" class="bg-white text-black mx-auto"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
 
-                    html = `
-                        <div class="p-10 bg-white text-gray-800 text-sm">
-                             <div class="grid grid-cols-12 gap-8">
-                                <div class="col-span-4">
-                                    ${photoHtml}
-                                    ${section('Contato', `<p>${data.email}</p><p>${data.phone}</p><p>${data.linkedin}</p><p>${data.location}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
-                                    ${section('Habilidades', skillsHtml, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
-                                </div>
-                                <div class="col-span-8">
-                                    <h1 class="text-5xl font-bold">${data.name}</h1>
-                                    <p class="text-xl font-bold text-gray-500 mt-1">${data.role}</p>
-                                    <div class="w-full h-1 ${theme.bg} my-4"></div>
-                                    ${section('Perfil', `<p>${data.summary}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
-                                    ${section('Experiência', expHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
-                                    ${section('Formação', eduHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
-                                </div>
-                            </div>
-                        </div>`;
-                    break;
-                case 'compact':
-                default:
-                    html = `
-                        <div class="p-8 text-gray-800 bg-gray-50 text-sm">
-                            <div class="grid grid-cols-12 gap-8">
-                                <div class="col-span-8 border-r pr-8 border-gray-200">
-                                    <h1 class="text-4xl font-bold">${data.name}</h1>
-                                    <p class="text-lg font-bold ${theme.text} mt-1">${data.role}</p>
-                                    ${section('Resumo Profissional', `<p>${data.summary}</p>`)}
-                                    ${section('Experiência', expHtml('mb-4'))}
-                                </div>
-                                <div class="col-span-4">
-                                     ${section('Contato', `<p>${data.email}</p><p>${data.phone}</p><p>${data.linkedin}</p><p>${data.location}</p>`)}
-                                     ${section('Formação', eduHtml('mb-2'))}
-                                     ${section('Habilidades', skillsHtml)}
-                                </div>
-                            </div>
-                        </div>`;
-                    break;
-            }
-            previewArea.innerHTML = html;
-        }
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 mb-10 text-sm text-gray-400">
+    <div class="flex items-center justify-between">
+      <p><i><b>Criado por Tiago Pinheiro</b></i></p>
+      <button onclick="toggleAboutModal()" class="hover:text-white transition">Sobre</button>
+    </div>
+  </footer>
 
+  <!-- Modal Sobre -->
+  <div id="about-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
+    <div class="glass rounded-2xl shadow-xl p-8 max-w-2xl w-full relative">
+      <button onclick="toggleAboutModal()" class="absolute top-4 right-4 text-gray-300 hover:text-white text-3xl leading-none" aria-label="Fechar">&times;</button>
+      <h2 class="text-3xl font-bold text-blue-300 mb-4">Sobre o Desenvolvedor</h2>
+      <p class="text-gray-300 mb-6">Este Gerador de Currículos foi criado por Tiago Pinheiro como demonstração de habilidades em desenvolvimento web front‑end (HTML, JS e Tailwind CSS), com foco em edição visual e exportação em PDF.</p>
+      <a href="https://tiagopinheiro8080.github.io/" target="_blank" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded">
+        Ver Portfólio
+      </a>
+    </div>
+  </div>
 
-        // PDF GENERATION (UPDATED FOR MULTIPAGE)
-        document.getElementById('download-pdf-btn').addEventListener('click', () => {
-            const { jsPDF } = window.jspdf;
-            const cv = document.getElementById('cv-preview-area');
-            const btn = document.getElementById('download-pdf-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Gerando...';
-            btn.disabled = true;
+  <script>
+    /* ===================== STATE E ELEMENTOS ===================== */
+    let currentScreen = 'home-screen';
+    let selectedTemplate = 'executive';
+    let selectedColor = 'blue';
+    const STORAGE_KEY = 'cvpro-data-v1'; // salva automaticamente (sem foto)
 
-            const pdf = new jsPDF({
-                orientation: 'p',
-                unit: 'mm',
-                format: 'a4',
-                putOnlyUsedFonts: true,
-                floatPrecision: 16
-            });
+    const formData = {
+      name:'', role:'', email:'', phone:'', linkedin:'', location:'',
+      photo:null, summary:'', experience:[], education:[], skills:[]
+    };
 
-            pdf.html(cv, {
-                callback: function (doc) {
-                    doc.save(`${formData.name.replace(/\s+/g, '_')}_curriculo.pdf`);
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                },
-                x: 0,
-                y: 0,
-                width: 210, // A4 width in mm
-                windowWidth: cv.scrollWidth,
-                autoPaging: 'text',
-                margin: [15, 0, 15, 0] // Top, Right, Bottom, Left
-            });
+    const screens = {
+      home: document.getElementById('home-screen'),
+      form: document.getElementById('form-screen'),
+      editor: document.getElementById('editor-screen'),
+    };
+    const previewArea = document.getElementById('cv-preview-area');
+    const form = document.getElementById('main-form');
+    const templateSelector = document.getElementById('template-selector');
+    const colorSelector = document.getElementById('color-selector');
+    const aboutModal = document.getElementById('about-modal');
+
+    // 10 templates (5 originais + 5 novos; 3 com foto nos novos)
+    const templates = [
+      { id: 'executive',    name: 'Executivo' },
+      { id: 'creative',     name: 'Criativo (Foto)', photo:true },
+      { id: 'timeline',     name: 'Cronológico' },
+      { id: 'modern',       name: 'Moderno' },
+      { id: 'compact',      name: 'Compacto' },
+      // novos
+      { id: 'elegant',      name: 'Elegante' },
+      { id: 'professional', name: 'Profissional' },
+      { id: 'photoLeft',    name: 'Foto Lateral (Foto)', photo:true },
+      { id: 'photoHeader',  name: 'Foto Cabeçalho (Foto)', photo:true },
+      { id: 'photoCard',    name: 'Foto em Cartão (Foto)', photo:true },
+    ];
+    const colors = {
+      blue:   { text:'text-blue-600',    bg:'bg-blue-600',    border:'border-blue-600',    ring:'ring-blue-600' },
+      green:  { text:'text-emerald-600', bg:'bg-emerald-600', border:'border-emerald-600', ring:'ring-emerald-600' },
+      gray:   { text:'text-slate-600',   bg:'bg-slate-600',   border:'border-slate-600',   ring:'ring-slate-600' },
+      purple: { text:'text-violet-600',  bg:'bg-violet-600',  border:'border-violet-600',  ring:'ring-violet-600' },
+      orange: { text:'text-orange-600',  bg:'bg-orange-600',  border:'border-orange-600',  ring:'ring-orange-600' },
+    };
+
+    /* ===================== NAV / MODAL ===================== */
+    function showScreen(screenId) {
+      Object.values(screens).forEach(s => s.classList.add('screen'));
+      Object.values(screens).forEach(s => s.classList.remove('active-screen'));
+      const key = screenId.split('-')[0];
+      screens[key].classList.remove('screen');
+      screens[key].classList.add('active-screen');
+      currentScreen = screenId;
+      window.scrollTo(0,0);
+      if (screenId === 'editor-screen' || screenId === 'form-screen'){
+        populateForm();
+        renderCV();
+      }
+    }
+    function toggleAboutModal(){ aboutModal.classList.toggle('hidden'); aboutModal.classList.toggle('flex'); }
+
+    /* ===================== DADOS / STORAGE ===================== */
+    function saveState(){
+      try{
+        const toSave = {...formData, photo:null};
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      }catch(e){}
+    }
+    function loadState(){
+      try{
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if(saved) Object.assign(formData, JSON.parse(saved));
+      }catch(e){}
+    }
+
+    /* ===================== ENTRADAS DINÂMICAS ===================== */
+    function addDynamicEntry(type, data={}){
+      const container = document.getElementById(`${type}-entries`);
+      const idx = container.children.length;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 p-4 rounded-xl bg-[#0b1528] border border-[#263142] relative';
+
+      let fields = '';
+      if(type === 'experience'){
+        fields = `
+          <input data-type="${type}" data-index="${idx}" data-key="title" class="form-input md:col-span-2" placeholder="Cargo" value="${data.title||''}">
+          <input data-type="${type}" data-index="${idx}" data-key="company" class="form-input" placeholder="Empresa" value="${data.company||''}">
+          <input data-type="${type}" data-index="${idx}" data-key="period" class="form-input" placeholder="Período (ex: 2020 - 2024)" value="${data.period||''}">
+          <textarea data-type="${type}" data-index="${idx}" data-key="description" rows="3" class="form-input md:col-span-2" placeholder="Descrição das atividades...">${data.description||''}</textarea>
+        `;
+      } else {
+        fields = `
+          <input data-type="${type}" data-index="${idx}" data-key="institution" class="form-input md:col-span-2" placeholder="Instituição" value="${data.institution||''}">
+          <input data-type="${type}" data-index="${idx}" data-key="description" class="form-input" placeholder="Curso ou Formação" value="${data.description||''}">
+          <input data-type="${type}" data-index="${idx}" data-key="period" class="form-input" placeholder="Período (ex: 2016 - 2020)" value="${data.period||''}">
+        `;
+      }
+      wrapper.innerHTML = `
+        <button type="button" onclick="removeDynamicEntry(this)" class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-500 hover:bg-red-400 text-white font-bold">×</button>
+        ${fields}
+      `;
+      container.appendChild(wrapper);
+    }
+    function removeDynamicEntry(btn){ btn.parentElement.remove(); renderCV(); }
+
+    /* ===================== FORM / FOTO ===================== */
+    function handlePhotoUpload(e){
+      const file = e.target.files[0];
+      if(!file){ formData.photo = null; renderCV(); return; }
+      const reader = new FileReader();
+      reader.onloadend = ()=>{ formData.photo = reader.result; renderCV(); };
+      reader.readAsDataURL(file);
+    }
+    function gatherFormData(){
+      const data = {};
+      document.querySelectorAll('#main-form [id]').forEach(el => {
+        if (el.type !== 'file') data[el.id] = el.value || '';
+      });
+      data.skills = (data.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+      ['experience','education'].forEach(type => {
+        data[type] = [];
+        document.querySelectorAll(`#${type}-entries > div`).forEach(div => {
+          const entry = {};
+          div.querySelectorAll('input, textarea').forEach(i => entry[i.dataset.key] = i.value || '');
+          data[type].push(entry);
         });
+      });
+      Object.assign(formData, data);
+    }
+    function populateForm(){
+      Object.keys(formData).forEach(k=>{
+        const el = document.getElementById(k);
+        if(el && k!=='photo'){
+          el.value = k==='skills' ? (Array.isArray(formData.skills)? formData.skills.join(', '):'') : (formData[k]||'');
+        }
+      });
+      ['experience','education'].forEach(t=>{
+        const cont = document.getElementById(`${t}-entries`);
+        cont.innerHTML = '';
+        (formData[t]||[]).forEach(d=> addDynamicEntry(t, d));
+      });
+    }
+    function resetData(){
+      localStorage.removeItem(STORAGE_KEY);
+      Object.assign(formData, {name:'',role:'',email:'',phone:'',linkedin:'',location:'',photo:null,summary:'',experience:[],education:[],skills:[]});
+      populateForm(); renderCV();
+    }
+    function fillSampleData(){
+      Object.assign(formData, {
+        name:'Tiago Pinheiro',
+        role:'Desenvolvedor Front-end',
+        email:'tiago@email.com',
+        phone:'(11) 99999-0000',
+        linkedin:'linkedin.com/in/tiagopinheiro',
+        location:'São Paulo, SP',
+        summary:'Desenvolvedor front-end com foco em acessibilidade, performance e design system. Experiência em React, Tailwind e automação de build.',
+        experience:[
+          {title:'Front-end Developer', company:'Acme Tech', period:'2022 — Atual', description:'Liderança de migração para Tailwind, testes e2e e otimização de build (-35% bundle).'},
+          {title:'UI Engineer', company:'StartApp', period:'2020 — 2022', description:'Criação de design system e bibliotecas de componentes reutilizáveis.'}
+        ],
+        education:[
+          {institution:'Universidade X', description:'Bacharel em Sistemas de Informação', period:'2016 — 2020'}
+        ],
+        skills:['HTML5','CSS3','JavaScript','React','Tailwind','Git','Acessibilidade']
+      });
+      populateForm(); renderCV(); showScreen('editor-screen');
+    }
 
-        // INITIALIZATION
-        document.addEventListener('DOMContentLoaded', () => {
-            // Populate template selector
-            templates.forEach(template => {
-                const card = document.createElement('div');
-                card.className = 'template-selector-card bg-gray-700 p-2 rounded-lg border-2 border-gray-600';
-                card.dataset.templateId = template.id;
-                card.innerHTML = `<div class="h-16 flex items-center justify-center text-gray-300 text-center text-sm">${template.name}</div>`;
-                card.addEventListener('click', () => {
-                    document.querySelectorAll('.template-selector-card').forEach(c => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                    selectedTemplate = card.dataset.templateId;
-                    renderCV();
-                });
-                templateSelector.appendChild(card);
-            });
-            
-            // Populate color selector
-            Object.keys(colors).forEach(colorName => {
-                const dot = document.createElement('div');
-                dot.className = `color-selector-dot w-8 h-8 rounded-full ${colors[colorName].bg} border-2 border-gray-800`;
-                dot.dataset.colorId = colorName;
-                dot.addEventListener('click', () => {
-                    document.querySelectorAll('.color-selector-dot').forEach(d => d.classList.remove('selected'));
-                    dot.classList.add('selected');
-                    selectedColor = dot.dataset.colorId;
-                    renderCV();
-                });
-                colorSelector.appendChild(dot);
-            });
-            
-            // Set default selections
-            document.querySelector(`.template-selector-card[data-template-id="${selectedTemplate}"]`).classList.add('selected');
-            document.querySelector(`.color-selector-dot[data-color-id="${selectedColor}"]`).classList.add('selected');
+    /* ===================== RENDER CV / TEMPLATES ===================== */
+    function renderCV(){
+      gatherFormData(); saveState();
+      const data = formData;
+      const theme = colors[selectedColor];
+      let html = '';
 
-            // Form listeners
-            form.addEventListener('input', renderCV);
-            document.getElementById('add-experience').addEventListener('click', () => addDynamicEntry('experience'));
-            document.getElementById('add-education').addEventListener('click', () => addDynamicEntry('education'));
-            document.getElementById('photo').addEventListener('change', handlePhotoUpload);
-        
-            populateForm();
-            showScreen('home-screen');
+      const section = (title, content, titleClasses = `text-sm font-bold ${theme.text} tracking-wider uppercase pb-2 mb-2 border-b-2 ${theme.border}`) => {
+        const has = content && (Array.isArray(content) ? content.length>0 : content.replace(/<[^>]*>/g,'').trim().length>0);
+        if(!has) return '';
+        return `<div class="mt-6" style="page-break-inside: avoid;"><h2 class="${titleClasses}">${title}</h2><div class="mt-2">${content}</div></div>`;
+      };
+
+      const expHtml = (itemClass='') => (data.experience||[]).map(exp=>`
+        <div class="${itemClass}" style="page-break-inside: avoid;">
+          <h3 class="font-bold text-md text-gray-800">${exp.title||''}</h3>
+          <div class="flex justify-between text-sm text-gray-500 italic">
+            <span>${exp.company||''}</span><span>${exp.period||''}</span>
+          </div>
+          <p class="text-sm text-gray-700 mt-1">${exp.description||''}</p>
+        </div>`).join('');
+
+      const eduHtml = (itemClass='') => (data.education||[]).map(edu=>`
+        <div class="${itemClass}" style="page-break-inside: avoid;">
+          <h3 class="font-bold text-md text-gray-800">${edu.description||''}</h3>
+          <div class="flex justify-between text-sm text-gray-500 italic">
+            <span>${edu.institution||''}</span><span>${edu.period||''}</span>
+          </div>
+        </div>`).join('');
+
+      const skillsHtml = `<ul class="list-disc list-inside space-y-1">${(data.skills||[]).map(s=>`<li class="text-sm text-gray-700">${s}</li>`).join('')}</ul>`;
+      const skillsHtmlDark = `<ul class="list-disc list-inside space-y-1">${(data.skills||[]).map(s=>`<li class="text-xs text-gray-300">${s}</li>`).join('')}</ul>`;
+
+      switch(selectedTemplate){
+        /* ---- 5 ORIGINAIS ---- */
+        case 'executive':
+          html = `
+          <div class="flex h-full text-sm">
+            <aside class="w-1/3 p-8 text-white" style="background-color:#2d3748;">
+              <h1 class="text-3xl font-bold leading-tight">${data.name||''}</h1>
+              <p class="text-lg ${theme.text} mt-1 font-bold">${data.role||''}</p>
+              <div class="mt-8 border-t border-gray-500 pt-6">
+                <h2 class="text-sm font-bold uppercase tracking-widest">Contato</h2>
+                <p class="text-xs mt-2 break-all">${data.email||''}</p>
+                <p class="text-xs mt-1">${data.phone||''}</p>
+                <p class="text-xs mt-1 break-all">${data.linkedin||''}</p>
+                <p class="text-xs mt-1">${data.location||''}</p>
+              </div>
+              ${section('<span class="text-white">Habilidades</span>', skillsHtmlDark, 'text-sm font-bold text-white tracking-wider uppercase pb-2 mb-2 border-b-2 border-gray-500')}
+            </aside>
+            <main class="w-2/3 p-8 text-gray-700 bg-white">
+              ${section('Perfil Profissional', `<p>${data.summary||''}</p>`)}
+              ${section('Experiência Profissional', expHtml('mb-4'))}
+              ${section('Formação Acadêmica', eduHtml('mb-4'))}
+            </main>
+          </div>`; break;
+
+        case 'modern':
+          html = `
+          <div class="p-10 text-gray-800 bg-white text-sm">
+            <div class="text-center pb-6 border-b-2 ${theme.border}">
+              <h1 class="text-5xl font-bold tracking-tight">${data.name||''}</h1>
+              <p class="text-xl ${theme.text} mt-2 font-bold">${data.role||''}</p>
+            </div>
+            <div class="flex justify-center text-xs space-x-4 py-3 text-gray-600">
+              ${(data.email && `<span>${data.email}</span>`)||''}
+              ${(data.phone && `<span>• ${data.phone}</span>`)||''}
+              ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
+              ${(data.location && `<span>• ${data.location}</span>`)||''}
+            </div>
+            ${section('Resumo', `<p class="text-center max-w-2xl mx-auto">${data.summary||''}</p>`)}
+            ${section('Experiência', expHtml('mb-4'))}
+            ${section('Formação', eduHtml('mb-4'))}
+            ${section('Habilidades', skillsHtml)}
+          </div>`; break;
+
+        case 'timeline':
+          html = `
+          <div class="p-10 bg-white text-sm">
+            <header class="relative text-center pb-8 mb-8">
+              <h1 class="text-4xl font-bold text-gray-800">${data.name||''}</h1>
+              <p class="text-lg font-bold ${theme.text} mt-1">${data.role||''}</p>
+              <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-0.5 ${theme.bg}"></div>
+            </header>
+            <div class="grid grid-cols-3 gap-8">
+              <div class="col-span-1">
+                ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`)}
+                ${section('Habilidades', skillsHtml)}
+              </div>
+              <div class="col-span-2">
+                ${section('Perfil', `<p>${data.summary||''}</p>`)}
+                ${section('Experiência', (data.experience||[]).map(exp=>`
+                    <div class="mb-4 relative pl-6" style="page-break-inside: avoid;">
+                      <div class="absolute left-0 top-1.5 h-full w-0.5 ${theme.bg} opacity-30"></div>
+                      <div class="absolute -left-1 top-1.5 w-3 h-3 rounded-full ${theme.bg}"></div>
+                      <p class="text-xs text-gray-500">${exp.period||''}</p>
+                      <h3 class="font-bold text-sm text-gray-800">${exp.title||''} ${exp.company?`em ${exp.company}`:''}</h3>
+                      <p class="text-xs text-gray-600 mt-1">${exp.description||''}</p>
+                    </div>`).join(''))}
+                ${section('Formação', eduHtml())}
+              </div>
+            </div>
+          </div>`; break;
+
+        case 'creative': {
+          const photo = data.photo
+            ? `<img src="${data.photo}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-md" alt="Foto">`
+            : `<div class="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center text-gray-500 text-xs p-2">Selecione uma foto</div>`;
+          html = `
+          <div class="p-10 bg-white text-gray-800 text-sm">
+            <div class="grid grid-cols-12 gap-8">
+              <aside class="col-span-4">
+                ${photo}
+                ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Habilidades', skillsHtml, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+              </aside>
+              <main class="col-span-8">
+                <h1 class="text-5xl font-bold">${data.name||''}</h1>
+                <p class="text-xl font-bold text-gray-500 mt-1">${data.role||''}</p>
+                <div class="w-full h-1 ${theme.bg} my-4"></div>
+                ${section('Perfil', `<p>${data.summary||''}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Experiência', expHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Formação', eduHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+              </main>
+            </div>
+          </div>`; break;
+        }
+
+        case 'compact':
+        default:
+          html = `
+          <div class="p-8 text-gray-800 bg-gray-50 text-sm">
+            <div class="grid grid-cols-12 gap-8">
+              <div class="col-span-8 border-r pr-8 border-gray-200">
+                <h1 class="text-4xl font-bold">${data.name||''}</h1>
+                <p class="text-lg font-bold ${theme.text} mt-1">${data.role||''}</p>
+                ${section('Resumo Profissional', `<p>${data.summary||''}</p>`)}
+                ${section('Experiência', expHtml('mb-4'))}
+              </div>
+              <aside class="col-span-4">
+                ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`)}
+                ${section('Formação', eduHtml('mb-2'))}
+                ${section('Habilidades', skillsHtml)}
+              </aside>
+            </div>
+          </div>`; break;
+
+        /* ---- 5 NOVOS ---- */
+        case 'elegant':
+          html = `
+          <div class="p-10 bg-white text-gray-800 text-sm">
+            <div class="flex items-start gap-4 mb-6">
+              <div class="w-1.5 h-16 ${theme.bg} rounded"></div>
+              <div>
+                <h1 class="text-4xl font-bold">${data.name||''}</h1>
+                <p class="text-lg ${theme.text} font-bold mt-1">${data.role||''}</p>
+                <div class="text-xs mt-2 text-gray-600 space-x-2">
+                  ${(data.email && `<span>${data.email}</span>`)||''}
+                  ${(data.phone && `<span>• ${data.phone}</span>`)||''}
+                  ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
+                  ${(data.location && `<span>• ${data.location}</span>`)||''}
+                </div>
+              </div>
+            </div>
+            ${section('Resumo', `<p>${data.summary||''}</p>`)}
+            <div class="grid grid-cols-2 gap-8">
+              <div>${section('Experiência', expHtml('mb-4'))}</div>
+              <div>${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}</div>
+            </div>
+          </div>`; break;
+
+        case 'professional':
+          html = `
+          <div class="bg-white text-sm">
+            <div class="${theme.bg} text-white p-8">
+              <h1 class="text-4xl font-bold">${data.name||''}</h1>
+              <p class="text-lg font-semibold opacity-90 mt-1">${data.role||''}</p>
+              <div class="text-xs mt-2 opacity-90 space-x-2">
+                ${(data.email && `<span>${data.email}</span>`)||''}
+                ${(data.phone && `<span>• ${data.phone}</span>`)||''}
+                ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
+                ${(data.location && `<span>• ${data.location}</span>`)||''}
+              </div>
+            </div>
+            <div class="p-8 text-gray-800">
+              ${section('Resumo', `<p>${data.summary||''}</p>`)}
+              <div class="grid grid-cols-3 gap-8">
+                <div class="col-span-2">${section('Experiência', expHtml('mb-4'))}</div>
+                <aside class="col-span-1">${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}</aside>
+              </div>
+            </div>
+          </div>`; break;
+
+        case 'photoLeft': {
+          const photo = data.photo
+            ? `<img src="${data.photo}" class="w-36 h-36 rounded-lg object-cover border-4 border-white shadow" alt="Foto">`
+            : `<div class="w-36 h-36 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 text-xs p-2">Adicione uma foto</div>`;
+          html = `
+          <div class="flex h-full text-sm bg-white text-gray-800">
+            <aside class="w-1/3 p-8 border-r border-gray-200">
+              <div class="mb-4 flex justify-center">${photo}</div>
+              ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`)}
+              ${section('Habilidades', skillsHtml)}
+            </aside>
+            <main class="w-2/3 p-8">
+              <h1 class="text-4xl font-bold">${data.name||''}</h1>
+              <p class="text-lg ${theme.text} font-bold mt-1">${data.role||''}</p>
+              <div class="w-16 h-1 ${theme.bg} my-4"></div>
+              ${section('Resumo', `<p>${data.summary||''}</p>`)}
+              ${section('Experiência', expHtml('mb-4'))}
+              ${section('Formação', eduHtml('mb-4'))}
+            </main>
+          </div>`; break;
+        }
+
+        case 'photoHeader': {
+          const photo = data.photo
+            ? `<img src="${data.photo}" class="w-28 h-28 rounded-full object-cover border-4 ${theme.border} shadow" alt="Foto">`
+            : `<div class="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs p-2">Foto</div>`;
+          html = `
+          <div class="p-10 bg-white text-gray-800 text-sm">
+            <header class="flex items-center justify-between border-b pb-6 mb-6">
+              <div>
+                <h1 class="text-4xl font-bold">${data.name||''}</h1>
+                <p class="text-lg ${theme.text} font-bold mt-1">${data.role||''}</p>
+                <div class="text-xs mt-2 text-gray-600 space-x-2">
+                  ${(data.email && `<span>${data.email}</span>`)||''}
+                  ${(data.phone && `<span>• ${data.phone}</span>`)||''}
+                  ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
+                  ${(data.location && `<span>• ${data.location}</span>`)||''}
+                </div>
+              </div>
+              <div class="shrink-0">${photo}</div>
+            </header>
+            ${section('Resumo', `<p>${data.summary||''}</p>`)}
+            <div class="grid grid-cols-3 gap-8">
+              <div class="col-span-2">${section('Experiência', expHtml('mb-4'))}</div>
+              <aside class="col-span-1">${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}</aside>
+            </div>
+          </div>`; break;
+        }
+
+        case 'photoCard': {
+          const photo = data.photo
+            ? `<img src="${data.photo}" class="w-full aspect-square object-cover rounded-lg border ${theme.border}" alt="Foto">`
+            : `<div class="w-full aspect-square rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 text-xs p-2">Foto opcional</div>`;
+          html = `
+          <div class="p-8 bg-white text-gray-800 text-sm">
+            <div class="grid grid-cols-12 gap-8">
+              <aside class="col-span-4">
+                <div class="p-4 border rounded-lg">
+                  ${photo}
+                  <h1 class="text-2xl font-bold mt-4">${data.name||''}</h1>
+                  <p class="${theme.text} font-bold">${data.role||''}</p>
+                  <div class="h-0.5 ${theme.bg} my-4"></div>
+                  ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`, `text-xs font-bold ${theme.text} tracking-wider uppercase`)}
+                  ${section('Habilidades', skillsHtml, `text-xs font-bold ${theme.text} tracking-wider uppercase`)}
+                </div>
+              </aside>
+              <main class="col-span-8">
+                ${section('Resumo', `<p>${data.summary||''}</p>`)}
+                ${section('Experiência', expHtml('mb-4'))}
+                ${section('Formação', eduHtml('mb-4'))}
+              </main>
+            </div>
+          </div>`; break;
+        }
+      }
+
+      previewArea.innerHTML = html;
+    }
+
+    /* ===================== PDF (html2canvas + jsPDF) ===================== */
+    function setupPDFButton(){
+      const btn = document.getElementById('download-pdf-btn');
+      btn.addEventListener('click', ()=>{
+        const { jsPDF } = window.jspdf;
+        const cv = document.getElementById('cv-preview-area');
+        const original = btn.innerHTML;
+        btn.innerHTML = 'Gerando...'; btn.disabled = true;
+
+        const pdf = new jsPDF({ orientation:'p', unit:'mm', format:'a4', putOnlyUsedFonts:true, floatPrecision:16 });
+        pdf.html(cv, {
+          callback: (doc)=>{
+            const safeName = (formData.name||'curriculo').replace(/\s+/g,'_');
+            doc.save(`${safeName}_curriculo.pdf`);
+            btn.innerHTML = original; btn.disabled = false;
+          },
+          x:0, y:0, width:210, windowWidth: cv.scrollWidth,
+          autoPaging:'text', margin:[15,0,15,0],
+          html2canvas:{ scale:2, useCORS:true }
         });
-    </script>
+      });
+    }
+
+    /* ===================== IMPORTAÇÃO DE CURRÍCULO (PDF/DOCX) ===================== */
+    // pdf.js worker já incluso via CDN. (Nada a configurar aqui.)
+    function setupImportButton(){
+      const openBtn = document.getElementById('import-resume-btn');
+      const input = document.getElementById('resumeImportInput');
+      openBtn.addEventListener('click', ()=> input.click());
+      input.addEventListener('change', (e)=> handleResumeImport(e.target.files[0]));
+    }
+    function handleResumeImport(file){
+      if (!file) return;
+      const name = file.name.toLowerCase();
+      if (name.endsWith('.pdf')) extractTextFromPDF(file);
+      else if (name.endsWith('.docx')) extractTextFromDOCX(file);
+      else alert('Formato não suportado. Envie um arquivo PDF ou DOCX.');
+    }
+    async function extractTextFromPDF(file){
+      try{
+        const arrayBuffer = await file.arrayBuffer();
+        // Desabilitar worker explicitamente se necessário: { data: arrayBuffer, useWorker: true }
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let text = '';
+        for (let i = 1; i <= pdf.numPages; i++){
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(it => it.str).join(' ') + '\n';
+        }
+        parseResumeText(text);
+      }catch(err){
+        console.error(err);
+        alert('Não foi possível ler o PDF. Tente outro arquivo.');
+      }
+    }
+    async function extractTextFromDOCX(file){
+      try{
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await window.mammoth.extractRawText({ arrayBuffer });
+        parseResumeText(result.value || '');
+      }catch(err){
+        console.error(err);
+        alert('Não foi possível ler o DOCX. Tente outro arquivo.');
+      }
+    }
+    function parseResumeText(text){
+      // Normaliza
+      const norm = text.replace(/\r/g, '').replace(/\t/g, ' ').replace(/[ ]{2,}/g, ' ');
+      // Campos diretos
+      const email = norm.match(/[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i)?.[0] || '';
+      const phone = norm.match(/(\(?\d{2,3}\)?\s?\d{4,5}[-\s]?\d{4})/)?.[0] || '';
+      const linkedin = norm.match(/(linkedin\.com\/[^\s]+)/i)?.[0] || '';
+      const location = norm.match(/([A-ZÁÂÃÉÊÍÓÔÕÚÇ][a-záâãéêíóôõúç]+,\s?[A-Z]{2})/)?.[0] || '';
+
+      // Nome: primeira linha com muitas letras, evita emails/telefones
+      const lines = norm.split('\n').map(l => l.trim()).filter(Boolean);
+      const nameLine = lines.find(l => l.length > 5 && !l.includes('@') && !/\d/.test(l) && /^[A-ZÀ-Úa-zà-ú\s\.-]+$/.test(l)) || '';
+
+      // Seções
+      const getSection = (labels) => {
+        const re = new RegExp(`(${labels})[\\s\\S]*?(?=\\n[A-ZÀ-Ú\\- ]{3,}\\n|$)`, 'i');
+        return norm.match(re)?.[0] || '';
+      };
+      const secSummary = getSection('Resumo|Perfil|Summary|Objective|Sobre');
+      const secExp = getSection('Experiência|Experience|Atuação');
+      const secEdu = getSection('Formação|Education|Acadêmica');
+      const secSkills = getSection('Habilidades|Skills|Competências');
+
+      formData.name = formData.name || nameLine.trim();
+      formData.email = email || formData.email;
+      formData.phone = phone || formData.phone;
+      formData.linkedin = linkedin || formData.linkedin;
+      formData.location = location || formData.location;
+
+      formData.summary = formData.summary || secSummary.replace(/^(Resumo|Perfil|Summary|Objective|Sobre)\s*:?\s*/i,'').split('\n').slice(0, 4).join(' ').trim();
+
+      // Experiências (heurística simples por blocos)
+      formData.experience = (secExp ? secExp.split(/\n{2,}/) : [])
+        .map(e => e.trim())
+        .filter(e => e.length > 15)
+        .slice(0, 4)
+        .map(e => ({
+          title: (e.match(/^[^\n]{5,60}/)?.[0] || '').trim(),
+          company: (e.match(/(?:em|at)\s+([A-Z][\w&.\- ]+)/i)?.[1] || '').trim(),
+          period: (e.match(/\b(\d{4})(\s?[–-]\s?|\s+a\s+|\s?\/\s?)(\d{4}|atual|presente|current)\b/i)?.[0] ||
+                   e.match(/\b\d{4}\b/)?.[0] || '').trim(),
+          description: e.replace(/\n/g,' ').slice(0, 360).trim()
+        }));
+
+      // Formação
+      formData.education = (secEdu ? secEdu.split(/\n{2,}/) : [])
+        .map(e => e.trim())
+        .filter(e => e.length > 10)
+        .slice(0, 3)
+        .map(e => ({
+          institution: (e.match(/^[A-ZÀ-Ú][^\n]{3,}/)?.[0] || '').trim(),
+          description: (e.match(/(Bacharel|Licenciatura|Tecnólogo|Técnico|Pós|Mestrado|Doutorado|Bachelor|Master)/i)?.[0] || '').trim(),
+          period: (e.match(/\b(\d{4})(\s?[–-]\s?|\s+a\s+|\s?\/\s?)(\d{4}|atual|presente|current)\b/i)?.[0] ||
+                   e.match(/\b\d{4}\b/)?.[0] || '').trim()
+        }));
+
+      // Habilidades
+      formData.skills = formData.skills?.length ? formData.skills : (
+        secSkills
+          .replace(/(Habilidades|Skills|Competências)\s*:?\s*/i,'')
+          .split(/[,\n;•]/)
+          .map(s => s.trim())
+          .filter(Boolean)
+          .slice(0, 20)
+      );
+
+      populateForm();
+      renderCV();
+      alert('Currículo importado com sucesso! Revise os dados e ajuste se necessário.');
+      showScreen('editor-screen');
+    }
+
+    /* ===================== INIT ===================== */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      loadState();
+
+      // Template cards com mini‑prévia + badge "Foto"
+      templates.forEach(t=>{
+        const card = document.createElement('div');
+        card.className = 'template-selector-card';
+        card.dataset.templateId = t.id;
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm text-gray-200">${t.name}</span>
+            ${t.photo ? '<span class="text-xs px-2 py-0.5 rounded bg-blue-600/30 text-blue-200 border border-blue-500/30">Foto</span>' : ''}
+          </div>
+          <div class="thumb">
+            <div class="title"></div>
+            <div class="bar"></div>
+            <div class="bar" style="width:85%"></div>
+            <div class="rule"></div>
+            <div class="bar" style="width:70%"></div>
+            <div class="bar" style="width:60%"></div>
+            <div class="chip"></div>
+          </div>
+        `;
+        card.addEventListener('click', ()=>{
+          document.querySelectorAll('.template-selector-card').forEach(c=>c.classList.remove('selected'));
+          card.classList.add('selected'); selectedTemplate = t.id; renderCV();
+        });
+        templateSelector.appendChild(card);
+      });
+
+      // Color dots
+      Object.keys(colors).forEach(c=>{
+        const dot = document.createElement('button');
+        dot.className = `color-selector-dot ${colors[c].bg}`;
+        dot.title = c; dot.dataset.colorId = c;
+        dot.addEventListener('click', ()=>{
+          document.querySelectorAll('.color-selector-dot').forEach(d=>d.classList.remove('selected'));
+          dot.classList.add('selected'); selectedColor = c; renderCV();
+        });
+        colorSelector.appendChild(dot);
+      });
+
+      // Seleções padrão
+      document.querySelector(`.template-selector-card[data-template-id="${selectedTemplate}"]`)?.classList.add('selected');
+      document.querySelector(`.color-selector-dot[data-color-id="${selectedColor}"]`)?.classList.add('selected');
+
+      // Form listeners
+      form.addEventListener('input', renderCV);
+      document.getElementById('add-experience').addEventListener('click', ()=> addDynamicEntry('experience'));
+      document.getElementById('add-education').addEventListener('click', ()=> addDynamicEntry('education'));
+      document.getElementById('photo').addEventListener('change', handlePhotoUpload);
+
+      // Import & PDF
+      setupImportButton();
+      setupPDFButton();
+
+      populateForm();
+      showScreen('home-screen');
+    });
+  </script>
 </body>
 </html>
-
