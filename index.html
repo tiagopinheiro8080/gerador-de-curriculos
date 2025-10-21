@@ -721,28 +721,50 @@
       previewArea.innerHTML = html;
     }
 
-    /* -------------- PDF -------------- */
-    document.addEventListener('DOMContentLoaded', ()=>{
-      document.getElementById('download-pdf-btn').addEventListener('click', ()=>{
-        const { jsPDF } = window.jspdf;
-        const cv = document.getElementById('cv-preview-area');
-        const btn = document.getElementById('download-pdf-btn');
-        const original = btn.innerHTML;
-        btn.innerHTML = 'Gerando...'; btn.disabled = true;
+   /* -------------- PDF CORRIGIDO (SUPORTE ATÉ 5 PÁGINAS) -------------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('download-pdf-btn').addEventListener('click', async ()=>{
+    const { jsPDF } = window.jspdf;
+    const cv = document.getElementById('cv-preview-area');
+    const btn = document.getElementById('download-pdf-btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = 'Gerando...'; btn.disabled = true;
 
-        const pdf = new jsPDF({ orientation:'p', unit:'mm', format:'a4', putOnlyUsedFonts:true, floatPrecision:16 });
-        pdf.html(cv, {
-          callback: (doc)=>{
-            const safeName = (formData.name||'curriculo').replace(/\s+/g,'_');
-            doc.save(`${safeName}_curriculo.pdf`);
-            btn.innerHTML = original; btn.disabled = false;
-          },
-          x:0, y:0, width:210, windowWidth: cv.scrollWidth,
-          autoPaging:'text', margin:[15,0,15,0],
-          html2canvas:{ scale:2, useCORS:true }
-        });
-      });
+    const totalHeight = cv.scrollHeight;
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'a4',
+      compress: true,
     });
+
+    await pdf.html(cv, {
+      callback: function (doc) {
+        const safeName = (formData.name || 'curriculo').replace(/\s+/g, '_');
+        const totalPages = doc.internal.getNumberOfPages();
+        if (totalPages > 5) {
+          alert('O currículo é muito extenso. O PDF foi limitado a 5 páginas.');
+        }
+        doc.save(`${safeName}_curriculo.pdf`);
+        btn.innerHTML = original; btn.disabled = false;
+      },
+      x: 10,
+      y: 10,
+      width: 190,              // Margens laterais (210 - 20)
+      autoPaging: 'text',      // Quebra automática
+      margin: [10, 10, 10, 10],
+      html2canvas: {
+        scale: 1.2,            // Corrige o tamanho e nitidez
+        useCORS: true,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 800,
+        height: totalHeight,   // Garante que captura todo o conteúdo
+      },
+    });
+  });
+});
+
 
     /* -------------- INIT -------------- */
     document.addEventListener('DOMContentLoaded', ()=>{
