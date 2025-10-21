@@ -721,16 +721,23 @@
       previewArea.innerHTML = html;
     }
 
-   /* -------------- PDF CORRIGIDO (SUPORTE ATÉ 5 PÁGINAS) -------------- */
-document.addEventListener('DOMContentLoaded', ()=>{
-  document.getElementById('download-pdf-btn').addEventListener('click', async ()=>{
-    const { jsPDF } = window.jspdf;
-    const cv = document.getElementById('cv-preview-area');
-    const btn = document.getElementById('download-pdf-btn');
-    const original = btn.innerHTML;
-    btn.innerHTML = 'Gerando...'; btn.disabled = true;
+   <!-- -------------- PDF CORRIGIDO (VERSÃO FINAL ESCALA REAL + MULTIPÁGINA) -------------- -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('download-pdf-btn');
+  const { jsPDF } = window.jspdf;
 
-    const totalHeight = cv.scrollHeight;
+  btn.addEventListener('click', async () => {
+    const cv = document.getElementById('cv-preview-area');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Gerando...';
+
+    // Calcula dimensões reais do conteúdo (em pixels)
+    const contentWidth = cv.scrollWidth;
+    const contentHeight = cv.scrollHeight;
+
+    // Configura doc A4
     const pdf = new jsPDF({
       orientation: 'p',
       unit: 'mm',
@@ -738,32 +745,40 @@ document.addEventListener('DOMContentLoaded', ()=>{
       compress: true,
     });
 
+    // Escala de conversão px → mm (ajuste fino para texto real)
+    const pxToMm = 0.264583;
+    const pageWidth = 210;
+    const margin = 10;
+    const usableWidth = pageWidth - margin * 2;
+
     await pdf.html(cv, {
-      callback: function (doc) {
-        const safeName = (formData.name || 'curriculo').replace(/\s+/g, '_');
-        const totalPages = doc.internal.getNumberOfPages();
-        if (totalPages > 5) {
+      callback: (doc) => {
+        const nome = (formData.name || 'curriculo').replace(/\s+/g, '_');
+        const pages = doc.internal.getNumberOfPages();
+        if (pages > 5)
           alert('O currículo é muito extenso. O PDF foi limitado a 5 páginas.');
-        }
-        doc.save(`${safeName}_curriculo.pdf`);
-        btn.innerHTML = original; btn.disabled = false;
+        doc.save(`${nome}_curriculo.pdf`);
+        btn.innerHTML = original;
+        btn.disabled = false;
       },
-      x: 10,
-      y: 10,
-      width: 190,              // Margens laterais (210 - 20)
-      autoPaging: 'text',      // Quebra automática
-      margin: [10, 10, 10, 10],
+      x: margin,
+      y: margin,
+      width: usableWidth,
+      windowWidth: contentWidth,
+      autoPaging: 'text',
       html2canvas: {
-        scale: 1.2,            // Corrige o tamanho e nitidez
+        scale: 0.9, // 🔧 Escala ideal (mantém fonte proporcional ao preview)
         useCORS: true,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: 800,
-        height: totalHeight,   // Garante que captura todo o conteúdo
+        width: contentWidth,
+        height: contentHeight,
       },
+      margin: [margin, margin, margin, margin],
     });
   });
 });
+</script>
 
 
     /* -------------- INIT -------------- */
