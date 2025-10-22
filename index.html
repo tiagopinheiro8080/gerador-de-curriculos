@@ -17,79 +17,61 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- PWA (igual ao seu) -->
+  <!-- PWA -->
   <meta name="theme-color" content="#0b1220" />
-  <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Gerador de Currículos PRO&quot;,&quot;short_name&quot;:&quot;CV PRO&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0b1220&quot;,&quot;theme_color&quot;:&quot;#0b1220&quot;,&quot;description&quot;:&quot;Crie seu currículo profissional de forma fácil e rápida.&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://placehold.co/192x192/1f2937/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;},{&quot;src&quot;:&quot;https://placehold.co/512x512/1f2937/FFFFFF?text=CV&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
   <link rel="icon" type="image/png" href="https://placehold.co/32x32/0b1220/FFFFFF?text=CV"/>
 
   <style>
     :root{
-      --bg-1:#0b1220; /* slate-950 custom */
-      --glass:#111827cc; /* semi-transp */
-      --glass-border:#ffffff1a;
+      --bg-1:#0b1220; --glass:#111827cc; --glass-border:#ffffff1a;
     }
     body{
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
       background:
         radial-gradient(1000px 500px at -10% -10%, rgba(59,130,246,.15), transparent 60%),
         radial-gradient(900px 480px at 110% 0%, rgba(16,185,129,.12), transparent 65%),
-        linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
-      color:#e5e7eb;
-      min-height:100vh;
+        linear-gradient(180deg,#0b1220 0%,#0f172a 100%);
+      color:#e5e7eb; min-height:100vh;
     }
-    .font-title{ font-family:'Montserrat', sans-serif; }
-    .screen{ display:none; }
-    .active-screen{ display:block; animation:fade .4s ease; }
-    @keyframes fade{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
-    .glass{ background:var(--glass); border:1px solid var(--glass-border); backdrop-filter: blur(10px); }
-    #cv-preview-area{ width:210mm; min-height:297mm; box-shadow:0 10px 30px rgba(0,0,0,.35); }
-    .template-selector-card{
-      cursor:pointer; transition:.2s; border:1px solid #334155; background: #0f172acc;
-    }
-    .template-selector-card:hover{ transform: translateY(-2px); }
-    .template-selector-card.selected{ outline:2px solid #3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,.25); }
-    .color-selector-dot{ cursor:pointer; transition:.2s; border:2px solid #0b1220; }
-    .color-selector-dot.selected{ transform:scale(1.15); box-shadow:0 0 0 3px white; }
-    .form-input{
-      width:100%; padding:.75rem .85rem .75rem 2.6rem; background:#0b1528; border:1px solid #263142;
-      border-radius:.75rem; color:#e5e7eb; transition:.2s; outline:none;
-    }
-    .form-input:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
-    .input-icon{ position:absolute; left:.8rem; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none; }
-    .badge{ font-size:.65rem; letter-spacing:.02em; text-transform:uppercase; padding:.2rem .4rem; border-radius:.35rem; }
-    .thumb{
-      background:#0b1528; border-radius:.5rem; padding:.5rem; display:grid; gap:.25rem; grid-template-rows: repeat(3, 10px) 1px repeat(3, 8px);
-    }
-    .thumb .bar{ height:8px; background:#1f2937; border-radius:3px; }
-    .thumb .title{ height:12px; width:70%; background:#334155; border-radius:3px; }
-    .thumb .rule{ height:1px; background:#334155; margin:.2rem 0; opacity:.7 }
-    .thumb .chip{ height:8px; width:35%; background:#374151; border-radius:999px }
-    @media print{ body{background:#fff} #cv-preview-area{box-shadow:none} }
+    .font-title{font-family:'Montserrat',sans-serif}
+    .screen{display:none}
+    .active-screen{display:block;animation:fade .4s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .glass{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(10px)}
+    .form-input{width:100%;padding:.75rem .85rem;background:#0b1528;border:1px solid #263142;border-radius:.75rem;color:#e5e7eb;outline:none}
+    .form-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.25)}
+    #cv-preview-area{width:210mm;min-height:297mm;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .template-selector-card{cursor:pointer;transition:.2s;border:1px solid #334155;background:#0f172acc;border-radius:.75rem;padding:.6rem}
+    .template-selector-card:hover{transform:translateY(-2px)}
+    .template-selector-card.selected{outline:2px solid #3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.25)}
+    .color-selector-dot{cursor:pointer;transition:.2s;border:2px solid #0b1220;width:34px;height:34px;border-radius:999px}
+    .color-selector-dot.selected{transform:scale(1.15);box-shadow:0 0 0 3px white}
+    @media print{body{background:#fff}#cv-preview-area{box-shadow:none}}
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <header class="sticky top-0 z-40">
-    <div class="backdrop-blur-lg bg-black/30 border-b border-white/10">
-      <nav class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-        <a class="flex items-center gap-2" href="#">
-          <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-emerald-500 text-white font-bold">CV</span>
-          <span class="font-title font-bold text-white">Gerador PRO</span>
-        </a>
-        <div class="flex items-center gap-3">
-          <button onclick="toggleAboutModal()" class="text-sm text-gray-300 hover:text-white transition">Sobre</button>
-          <a href="https://tiagopinheiro8080.github.io/" target="_blank" class="hidden sm:inline-flex text-sm px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/15 border border-white/10">Portfólio</a>
-        </div>
-      </nav>
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 bg-black/40 backdrop-blur-lg border-b border-white/10">
+    <div class="max-w-7xl mx-auto flex items-center justify-between p-3">
+      <h1 class="font-title text-white text-xl">Gerador de Currículos PRO</h1>
+      <button onclick="toggleAboutModal()" class="text-gray-300 hover:text-white">Sobre</button>
     </div>
   </header>
 
-  <!-- Stepper -->
+  <!-- MODAL -->
+  <div id="about-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+    <div class="glass rounded-xl p-8 max-w-lg relative">
+      <button onclick="toggleAboutModal()" class="absolute top-2 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+      <h2 class="text-2xl font-bold text-blue-400 mb-4">Sobre o Desenvolvedor</h2>
+      <p class="text-gray-300 mb-4">Projeto desenvolvido por <b>Tiago Pinheiro</b> (HTML, Tailwind CSS e JavaScript).</p>
+      <a href="https://tiagopinheiro8080.github.io/" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded">Ver Portfólio</a>
+    </div>
+  </div>
+
+  <!-- STEPPER -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
-    <ol id="stepper" class="grid grid-cols-3 gap-3">
-      <!-- preenchido via JS -->
-    </ol>
+    <ol id="stepper" class="grid grid-cols-3 gap-3"></ol>
   </div>
 
   <main id="app" class="max-w-7xl mx-auto p-4 sm:p-6">
@@ -98,7 +80,7 @@
     <section id="home-screen" class="active-screen">
       <div class="glass rounded-2xl p-10 md:p-14 text-center">
         <h1 class="text-4xl md:text-6xl font-title font-bold text-white">Crie seu <span class="text-transparent bg-clip-text bg-gradient-to-tr from-blue-400 to-emerald-400">Currículo Profissional</span></h1>
-        <p class="max-w-2xl mx-auto text-gray-300 mt-4">Templates modernos, opção de foto, exportação em PDF e salvamento automático de rascunhos.</p>
+        <p class="max-w-2xl mx-auto text-gray-300 mt-4">Templates modernos, opção de foto, exportação em PDF e salvamento automático.</p>
         <div class="mt-10 flex items-center justify-center gap-3">
           <button onclick="showScreen('form-screen')" class="px-6 py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-600 to-emerald-500 hover:opacity-95 transition">Começar agora</button>
           <button onclick="showScreen('editor-screen'); fillSampleData();" class="px-6 py-3 rounded-xl border border-white/15 text-gray-100 hover:bg-white/10 transition">Ver exemplo</button>
@@ -109,92 +91,88 @@
     <!-- FORM -->
     <section id="form-screen" class="screen">
       <div class="glass rounded-2xl p-6 md:p-8">
-        <h2 class="text-3xl font-title font-bold text-white mb-6">Informações Pessoais</h2>
+        <h2 class="text-3xl font-title font-bold text-white mb-6 text-center">Preencha seus Dados</h2>
 
         <form id="main-form" class="space-y-8">
+
+          <!-- Dados pessoais -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Nome -->
-            <div class="relative">
-              <span class="input-icon">
-                <!-- user icon -->
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Z" stroke="currentColor" stroke-width="1.6"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              </span>
-              <input id="name" type="text" class="form-input" placeholder="Nome Completo" />
+            <input id="name" class="form-input" placeholder="Nome Completo">
+            <input id="role" class="form-input" placeholder="Cargo Desejado">
+            <input id="email" type="email" class="form-input" placeholder="Email">
+            <input id="phone" class="form-input" placeholder="Telefone">
+            <input id="linkedin" class="form-input" placeholder="LinkedIn (URL)">
+            <input id="location" class="form-input" placeholder="Cidade, Estado">
+            <div class="md:col-span-2">
+              <label class="text-sm text-gray-300 block mb-1" for="photo">Foto (opcional)</label>
+              <input id="photo" type="file" accept="image/*" class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" />
             </div>
-            <!-- Cargo -->
-            <div class="relative">
-              <span class="input-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 7h18M7 7v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7" stroke="currentColor" stroke-width="1.6"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.6"/></svg>
-              </span>
-              <input id="role" type="text" class="form-input" placeholder="Cargo Desejado" />
-            </div>
-            <!-- Email -->
-            <div class="relative">
-              <span class="input-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 7.5 12 13l9-5.5M5 6h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              </span>
-              <input id="email" type="email" class="form-input" placeholder="Email" />
-            </div>
-            <!-- Telefone -->
-            <div class="relative">
-              <span class="input-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1.5 1.5 0 0 1 1.6-.36 9.6 9.6 0 0 0 3 .48 1.5 1.5 0 0 1 1.5 1.5V20a1.5 1.5 0 0 1-1.5 1.5A17.5 17.5 0 0 1 3 7.5 1.5 1.5 0 0 1 4.5 6H7a1.5 1.5 0 0 1 1.5 1.5 9.6 9.6 0 0 0 .48 3 1.5 1.5 0 0 1-.36 1.6l-2.02 2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              </span>
-              <input id="phone" type="tel" class="form-input" placeholder="Telefone" />
-            </div>
-            <!-- LinkedIn -->
-            <div class="relative">
-              <span class="input-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6.94 9.5V18M6.94 6V6.01M11.5 18v-5.06a2.44 2.44 0 0 1 4.88 0V18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4 18h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              </span>
-              <input id="linkedin" type="text" class="form-input" placeholder="Link do LinkedIn (URL)" />
-            </div>
-            <!-- Localização -->
-            <div class="relative">
-              <span class="input-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/></svg>
-              </span>
-              <input id="location" type="text" class="form-input" placeholder="Cidade, Estado" />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4">
-            <div>
-              <label for="photo" class="block text-sm text-gray-300 mb-1">Foto (opcional, para templates específicos)</label>
-              <input id="photo" type="file" accept="image/*"
-                     class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" />
-            </div>
-
-            <div>
-              <label for="summary" class="block text-sm text-gray-300 mb-1">Resumo profissional</label>
-              <textarea id="summary" rows="4" class="w-full p-4 rounded-xl bg-[#0b1528] border border-[#263142] focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Fale brevemente sobre suas principais conquistas e competências..."></textarea>
+            <div class="md:col-span-2">
+              <label class="text-sm text-gray-300 block mb-1" for="summary">Resumo profissional</label>
+              <textarea id="summary" rows="4" class="form-input" placeholder="Fale brevemente sobre suas principais conquistas e competências..."></textarea>
             </div>
           </div>
 
           <hr class="border-white/10" />
 
+          <!-- Experiência -->
           <div id="experience-section">
             <div class="flex items-center justify-between">
               <h3 class="text-xl font-bold text-blue-300">Experiência Profissional</h3>
-              <button type="button" id="add-experience" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">Adicionar</button>
+              <button type="button" id="add-experience" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">+ Adicionar</button>
             </div>
             <div id="experience-entries" class="space-y-4 mt-4"></div>
           </div>
 
-          <div id="education-section" class="mt-6">
+          <!-- Formação -->
+          <div id="education-section" class="mt-2">
             <div class="flex items-center justify-between">
               <h3 class="text-xl font-bold text-blue-300">Formação Acadêmica</h3>
-              <button type="button" id="add-education" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">Adicionar</button>
+              <button type="button" id="add-education" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">+ Adicionar</button>
             </div>
             <div id="education-entries" class="space-y-4 mt-4"></div>
           </div>
-        </form>
-      </div>
 
-      <div class="flex flex-wrap gap-3 justify-center mt-6">
-        <button onclick="showScreen('editor-screen')" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">Avançar para Editor</button>
-        <button onclick="fillSampleData()" class="px-6 py-3 rounded-xl border border-white/15 hover:bg-white/10">Preencher Exemplo</button>
-        <button onclick="resetData()" class="px-6 py-3 rounded-xl border border-white/15 hover:bg-white/10">Limpar Dados</button>
+          <!-- Habilidades -->
+          <div>
+            <h3 class="text-xl font-bold text-blue-300 mb-2">Habilidades</h3>
+            <textarea id="skills" rows="3" class="form-input" placeholder="HTML, CSS, JavaScript, Comunicação, Liderança... (separe por vírgulas)"></textarea>
+          </div>
+
+          <!-- Idiomas -->
+          <div id="languages-section" class="mt-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-bold text-blue-300">Idiomas</h3>
+              <button type="button" id="add-language" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">+ Adicionar</button>
+            </div>
+            <div id="languages-entries" class="space-y-4 mt-4"></div>
+          </div>
+
+          <!-- Certificações -->
+          <div id="certifications-section" class="mt-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-bold text-blue-300">Certificações</h3>
+              <button type="button" id="add-certification" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">+ Adicionar</button>
+            </div>
+            <div id="certifications-entries" class="space-y-4 mt-4"></div>
+          </div>
+
+          <!-- Projetos / Links -->
+          <div id="projects-section" class="mt-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xl font-bold text-blue-300">Projetos / Links</h3>
+              <button type="button" id="add-project" class="px-3 py-1.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-500">+ Adicionar</button>
+            </div>
+            <div id="projects-entries" class="space-y-4 mt-4"></div>
+          </div>
+
+        </form>
+
+        <div class="flex flex-wrap gap-3 justify-center mt-6">
+          <button onclick="showScreen('editor-screen')" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">Avançar para Editor</button>
+          <button onclick="fillSampleData()" class="px-6 py-3 rounded-xl border border-white/15 hover:bg-white/10">Preencher Exemplo</button>
+          <button onclick="resetData()" class="px-6 py-3 rounded-xl border border-white/15 hover:bg-white/10">Limpar Dados</button>
+        </div>
       </div>
     </section>
 
@@ -204,31 +182,25 @@
         <!-- Sidebar -->
         <aside class="glass rounded-2xl p-6 w-full lg:w-[340px] self-start lg:sticky top-6">
           <h2 class="text-2xl font-title font-bold mb-3">Editor</h2>
-
-          <!-- Templates -->
           <div class="mt-4">
             <h3 class="text-sm text-blue-300 font-semibold mb-2">Layout do Template</h3>
             <div id="template-selector" class="grid grid-cols-2 gap-3"></div>
           </div>
-
-          <!-- Cores -->
           <div class="mt-6">
             <h3 class="text-sm text-blue-300 font-semibold mb-2">Cor de Destaque</h3>
             <div id="color-selector" class="flex flex-wrap gap-3"></div>
           </div>
-
           <hr class="my-6 border-white/10"/>
-
           <div class="space-y-3">
             <button onclick="showScreen('form-screen')" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Editar Informações</button>
             <button id="download-pdf-btn" class="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold flex items-center justify-center gap-2">
               <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/></svg>
-              Baixar PDF
+              Baixar PDF (A4)
             </button>
             <button onclick="fillSampleData()" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Preencher Exemplo</button>
             <button onclick="resetData()" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Limpar Dados</button>
           </div>
-          <p class="text-xs text-gray-400 mt-4">Dica: seções longas quebram em páginas automaticamente ao exportar.</p>
+          <p class="text-xs text-gray-400 mt-4">Dica: elementos longos evitam quebra no meio; a exportação suporta até 5 páginas.</p>
         </aside>
 
         <!-- Preview -->
@@ -248,28 +220,19 @@
     </div>
   </footer>
 
-  <!-- Modal Sobre -->
-  <div id="about-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
-    <div class="glass rounded-2xl shadow-xl p-8 max-w-2xl w-full relative">
-      <button onclick="toggleAboutModal()" class="absolute top-4 right-4 text-gray-300 hover:text-white text-3xl leading-none" aria-label="Fechar">&times;</button>
-      <h2 class="text-3xl font-bold text-blue-300 mb-4">Sobre o Desenvolvedor</h2>
-      <p class="text-gray-300 mb-6">Este Gerador de Currículos foi criado por Tiago Pinheiro como demonstração de habilidades em desenvolvimento web front‑end (HTML, JS e Tailwind CSS), com foco em edição visual e exportação em PDF.</p>
-      <a href="https://tiagopinheiro8080.github.io/" target="_blank" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded">
-        Ver Portfólio
-      </a>
-    </div>
-  </div>
-
+  <!-- ======================= SCRIPT PRINCIPAL ======================= -->
   <script>
     /* ---------------- STATE ---------------- */
     let currentScreen = 'home-screen';
     let selectedTemplate = 'executive';
     let selectedColor = 'blue';
-    const STORAGE_KEY = 'cvpro-data-v1';
+    const STORAGE_KEY = 'cvpro-data-v2';
 
     const formData = {
       name:'', role:'', email:'', phone:'', linkedin:'', location:'',
-      photo:null, summary:'', experience:[], education:[], skills:[]
+      photo:null, summary:'',
+      experience:[], education:[], skills:[],
+      languages:[], certifications:[], projects:[]
     };
 
     /* -------------- ELEMENTOS -------------- */
@@ -285,7 +248,7 @@
     const aboutModal = document.getElementById('about-modal');
     const stepper = document.getElementById('stepper');
 
-    /* -------------- DADOS BÁSICOS -------------- */
+    /* -------------- DADOS -------------- */
     const templates = [
       { id: 'executive',    name: 'Executivo' },
       { id: 'creative',     name: 'Criativo (Foto)', photo:true },
@@ -307,7 +270,7 @@
       orange: { text:'text-orange-600',  bg:'bg-orange-600',  border:'border-orange-600',  ring:'ring-orange-600' },
     };
 
-    /* -------------- NAVEGAÇÃO / UI -------------- */
+    /* -------------- NAV / UI -------------- */
     function updateStepper(){
       const steps = [
         {id:'home-screen', label:'Início', idx:0},
@@ -349,28 +312,52 @@
     function addDynamicEntry(type, data={}){
       const container = document.getElementById(`${type}-entries`);
       const idx = container.children.length;
-      const wrapper = document.createElement('div');
-      wrapper.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 p-4 rounded-xl bg-[#0b1528] border border-[#263142] relative';
+      const wrapCls = 'grid grid-cols-1 md:grid-cols-2 gap-3 p-4 rounded-xl bg-[#0b1528] border border-[#263142] relative';
+      const wrapper = document.createElement('div'); wrapper.className = wrapCls;
 
       let fields = '';
-      if(type === 'experience'){
-        fields = `
-          <input data-type="${type}" data-index="${idx}" data-key="title" class="form-input md:col-span-2" placeholder="Cargo" value="${data.title||''}">
-          <input data-type="${type}" data-index="${idx}" data-key="company" class="form-input" placeholder="Empresa" value="${data.company||''}">
-          <input data-type="${type}" data-index="${idx}" data-key="period" class="form-input" placeholder="Período (ex: 2020 - 2024)" value="${data.period||''}">
-          <textarea data-type="${type}" data-index="${idx}" data-key="description" rows="3" class="form-input md:col-span-2" placeholder="Descrição das atividades...">${data.description||''}</textarea>
-        `;
-      } else {
-        fields = `
-          <input data-type="${type}" data-index="${idx}" data-key="institution" class="form-input md:col-span-2" placeholder="Instituição" value="${data.institution||''}">
-          <input data-type="${type}" data-index="${idx}" data-key="description" class="form-input" placeholder="Curso ou Formação" value="${data.description||''}">
-          <input data-type="${type}" data-index="${idx}" data-key="period" class="form-input" placeholder="Período (ex: 2016 - 2020)" value="${data.period||''}">
-        `;
+      switch(type){
+        case 'experience':
+          fields = `
+            <input data-type="${type}" data-index="${idx}" data-key="title" class="form-input md:col-span-2" placeholder="Cargo" value="${data.title||''}">
+            <input data-type="${type}" data-index="${idx}" data-key="company" class="form-input" placeholder="Empresa" value="${data.company||''}">
+            <input data-type="${type}" data-index="${idx}" data-key="period" class="form-input" placeholder="Período (ex: 2020 - 2024)" value="${data.period||''}">
+            <textarea data-type="${type}" data-index="${idx}" data-key="description" rows="3" class="form-input md:col-span-2" placeholder="Descrição das atividades...">${data.description||''}</textarea>
+          `; break;
+        case 'education':
+          fields = `
+            <input data-type="${type}" data-index="${idx}" data-key="institution" class="form-input md:col-span-2" placeholder="Instituição" value="${data.institution||''}">
+            <input data-type="${type}" data-index="${idx}" data-key="description" class="form-input" placeholder="Curso / Programa" value="${data.description||''}">
+            <select data-type="${type}" data-index="${idx}" data-key="level" class="form-input">
+              ${['Fundamental','Médio','Técnico','Tecnólogo','Graduação','Pós-graduação','MBA','Mestrado','Doutorado','Outro']
+                .map(l=>`<option ${data.level===l?'selected':''}>${l}</option>`).join('')}
+            </select>
+            <input data-type="${type}" data-index="${idx}" data-key="period" class="form-input" placeholder="Período (ex: 2018 - 2022)" value="${data.period||''}">
+          `; break;
+        case 'languages':
+          fields = `
+            <input data-type="${type}" data-index="${idx}" data-key="name" class="form-input" placeholder="Idioma (ex: Inglês)" value="${data.name||''}">
+            <select data-type="${type}" data-index="${idx}" data-key="level" class="form-input">
+              ${['Básico','Intermediário','Avançado','Fluente','Nativo'].map(l=>`<option ${data.level===l?'selected':''}>${l}</option>`).join('')}
+            </select>
+          `; break;
+        case 'certifications':
+          fields = `
+            <input data-type="${type}" data-index="${idx}" data-key="name" class="form-input md:col-span-2" placeholder="Certificação" value="${data.name||''}">
+            <input data-type="${type}" data-index="${idx}" data-key="issuer" class="form-input" placeholder="Instituição" value="${data.issuer||''}">
+            <input data-type="${type}" data-index="${idx}" data-key="period" class="form-input" placeholder="Ano/Período" value="${data.period||''}">
+          `; break;
+        case 'projects':
+          fields = `
+            <input data-type="${type}" data-index="${idx}" data-key="name" class="form-input md:col-span-2" placeholder="Projeto" value="${data.name||''}">
+            <input data-type="${type}" data-index="${idx}" data-key="link" class="form-input" placeholder="Link (URL)" value="${data.link||''}">
+            <textarea data-type="${type}" data-index="${idx}" data-key="description" rows="2" class="form-input md:col-span-2" placeholder="Descrição do projeto...">${data.description||''}</textarea>
+          `; break;
       }
+
       wrapper.innerHTML = `
         <button type="button" onclick="removeDynamicEntry(this)" class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-500 hover:bg-red-400 text-white font-bold">×</button>
-        ${fields}
-      `;
+        ${fields}`;
       container.appendChild(wrapper);
     }
     function removeDynamicEntry(btn){ btn.parentElement.remove(); renderCV(); }
@@ -401,14 +388,16 @@
         if (el.type !== 'file') data[el.id] = el.value || '';
       });
       data.skills = (data.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-      ['experience','education'].forEach(type => {
+
+      ['experience','education','languages','certifications','projects'].forEach(type => {
         data[type] = [];
         document.querySelectorAll(`#${type}-entries > div`).forEach(div => {
           const entry = {};
-          div.querySelectorAll('input, textarea').forEach(i => entry[i.dataset.key] = i.value || '');
+          div.querySelectorAll('input, textarea, select').forEach(i => entry[i.dataset.key] = i.value || '');
           data[type].push(entry);
         });
       });
+
       Object.assign(formData, data);
     }
     function populateForm(){
@@ -418,15 +407,16 @@
           el.value = k==='skills' ? (Array.isArray(formData.skills)? formData.skills.join(', '):'') : (formData[k]||'');
         }
       });
-      ['experience','education'].forEach(t=>{
+      ['experience','education','languages','certifications','projects'].forEach(t=>{
         const cont = document.getElementById(`${t}-entries`);
+        if(!cont) return;
         cont.innerHTML = '';
         (formData[t]||[]).forEach(d=> addDynamicEntry(t, d));
       });
     }
     function resetData(){
       localStorage.removeItem(STORAGE_KEY);
-      Object.assign(formData, {name:'',role:'',email:'',phone:'',linkedin:'',location:'',photo:null,summary:'',experience:[],education:[],skills:[]});
+      Object.assign(formData, {name:'',role:'',email:'',phone:'',linkedin:'',location:'',photo:null,summary:'',experience:[],education:[],skills:[],languages:[],certifications:[],projects:[]});
       populateForm(); renderCV();
     }
     function fillSampleData(){
@@ -437,23 +427,27 @@
         phone:'(11) 99999-0000',
         linkedin:'linkedin.com/in/tiagopinheiro',
         location:'São Paulo, SP',
-        summary:'Desenvolvedor front-end com foco em acessibilidade, performance e design system. Experiência em React, Tailwind e automação de build.',
+        summary:'Front-end focado em acessibilidade, performance e design system. Experiência em React, Tailwind e automação.',
         experience:[
-          {title:'Front-end Developer', company:'Acme Tech', period:'2022 — Atual', description:'Liderança de migração para Tailwind, testes e2e e otimização de build (-35% bundle).'},
-          {title:'UI Engineer', company:'StartApp', period:'2020 — 2022', description:'Criação de design system e bibliotecas de componentes reutilizáveis.'}
+          {title:'Front-end Developer', company:'Acme Tech', period:'2022 — Atual', description:'Liderança de migração para Tailwind, testes e2e e otimização de bundle (-35%).'},
+          {title:'UI Engineer', company:'StartApp', period:'2020 — 2022', description:'Criação de design system e componentes reutilizáveis.'}
         ],
         education:[
-          {institution:'Universidade X', description:'Bacharel em Sistemas de Informação', period:'2016 — 2020'}
+          {institution:'Universidade X', description:'Sistemas de Informação', level:'Graduação', period:'2016 — 2020'},
+          {institution:'Instituto Y', description:'Técnico em Informática', level:'Técnico', period:'2013 — 2015'}
         ],
-        skills:['HTML5','CSS3','JavaScript','React','Tailwind','Git','Acessibilidade']
+        skills:['HTML5','CSS3','JavaScript','React','Tailwind','Git','Acessibilidade'],
+        languages:[{name:'Português',level:'Nativo'},{name:'Inglês',level:'Avançado'}],
+        certifications:[{name:'Scrum Fundamentals',issuer:'ScrumStudy',period:'2021'},{name:'React Developer',issuer:'Meta',period:'2023'}],
+        projects:[{name:'Portfolio',link:'https://tiagopinheiro8080.github.io/',description:'Portfólio com projetos e estudos.'}]
       });
       populateForm(); renderCV(); showScreen('editor-screen');
     }
 
-    /* -------------- RENDER CV -------------- */
+    /* -------------- RENDER CV / TEMPLATES -------------- */
     function renderCV(){
       gatherFormData(); saveState();
-      const data = formData;
+      const d = formData;
       const theme = colors[selectedColor];
       let html = '';
 
@@ -463,7 +457,7 @@
         return `<div class="mt-6" style="page-break-inside: avoid;"><h2 class="${titleClasses}">${title}</h2><div class="mt-2">${content}</div></div>`;
       };
 
-      const expHtml = (itemClass='') => (data.experience||[]).map(exp=>`
+      const expHtml = (itemClass='') => (d.experience||[]).map(exp=>`
         <div class="${itemClass}" style="page-break-inside: avoid;">
           <h3 class="font-bold text-md text-gray-800">${exp.title||''}</h3>
           <div class="flex justify-between text-sm text-gray-500 italic">
@@ -472,37 +466,49 @@
           <p class="text-sm text-gray-700 mt-1">${exp.description||''}</p>
         </div>`).join('');
 
-      const eduHtml = (itemClass='') => (data.education||[]).map(edu=>`
+      const eduHtml = (itemClass='') => (d.education||[]).map(edu=>`
         <div class="${itemClass}" style="page-break-inside: avoid;">
-          <h3 class="font-bold text-md text-gray-800">${edu.description||''}</h3>
+          <h3 class="font-bold text-md text-gray-800">${edu.description||''}${edu.level?` — <span class="font-normal text-gray-600">${edu.level}</span>`:''}</h3>
           <div class="flex justify-between text-sm text-gray-500 italic">
             <span>${edu.institution||''}</span><span>${edu.period||''}</span>
           </div>
         </div>`).join('');
 
-      const skillsHtml = `<ul class="list-disc list-inside space-y-1">${(data.skills||[]).map(s=>`<li class="text-sm text-gray-700">${s}</li>`).join('')}</ul>`;
-      const skillsHtmlDark = `<ul class="list-disc list-inside space-y-1">${(data.skills||[]).map(s=>`<li class="text-xs text-gray-300">${s}</li>`).join('')}</ul>`;
+      const skillsHtml = `<ul class="list-disc list-inside space-y-1">${(d.skills||[]).map(s=>`<li class="text-sm text-gray-700">${s}</li>`).join('')}</ul>`;
+      const skillsHtmlDark = `<ul class="list-disc list-inside space-y-1">${(d.skills||[]).map(s=>`<li class="text-xs text-gray-300">${s}</li>`).join('')}</ul>`;
+      const langsHtml = `<ul class="list-disc list-inside space-y-1">${(d.languages||[]).map(l=>`<li class="text-sm text-gray-700">${l.name||''} — ${l.level||''}</li>`).join('')}</ul>`;
+      const certsHtml = `<ul class="list-disc list-inside space-y-1">${(d.certifications||[]).map(c=>`<li class="text-sm text-gray-700">${c.name||''}${c.issuer?` — ${c.issuer}`:''}${c.period?` (${c.period})`:''}</li>`).join('')}</ul>`;
+      const projsHtml = (d.projects||[]).map(p=>`
+        <div class="mb-2">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-sm text-gray-800">${p.name||''}</span>
+            ${p.link?`<span class="text-xs text-blue-600 break-all">${p.link}</span>`:''}
+          </div>
+          ${p.description?`<p class="text-sm text-gray-700">${p.description}</p>`:''}
+        </div>`).join('');
 
       switch(selectedTemplate){
+        /* ---- 5 ORIGINAIS ---- */
         case 'executive':
           html = `
           <div class="flex h-full text-sm">
             <aside class="w-1/3 p-8 text-white" style="background-color:#2d3748;">
-              <h1 class="text-3xl font-bold leading-tight">${data.name||''}</h1>
-              <p class="text-lg ${theme.text} mt-1 font-bold">${data.role||''}</p>
+              <h1 class="text-3xl font-bold leading-tight">${d.name||''}</h1>
+              <p class="text-lg ${theme.text} mt-1 font-bold">${d.role||''}</p>
               <div class="mt-8 border-t border-gray-500 pt-6">
                 <h2 class="text-sm font-bold uppercase tracking-widest">Contato</h2>
-                <p class="text-xs mt-2 break-all">${data.email||''}</p>
-                <p class="text-xs mt-1">${data.phone||''}</p>
-                <p class="text-xs mt-1 break-all">${data.linkedin||''}</p>
-                <p class="text-xs mt-1">${data.location||''}</p>
+                <p class="text-xs mt-2 break-all">${d.email||''}</p><p class="text-xs mt-1">${d.phone||''}</p>
+                <p class="text-xs mt-1 break-all">${d.linkedin||''}</p><p class="text-xs mt-1">${d.location||''}</p>
               </div>
               ${section('<span class="text-white">Habilidades</span>', skillsHtmlDark, 'text-sm font-bold text-white tracking-wider uppercase pb-2 mb-2 border-b-2 border-gray-500')}
+              ${section('<span class="text-white">Idiomas</span>', langsHtml, 'text-sm font-bold text-white tracking-wider uppercase pb-2 mb-2 border-b-2 border-gray-500')}
+              ${section('<span class="text-white">Certificações</span>', certsHtml, 'text-sm font-bold text-white tracking-wider uppercase pb-2 mb-2 border-b-2 border-gray-500')}
             </aside>
             <main class="w-2/3 p-8 text-gray-700 bg-white">
-              ${section('Perfil Profissional', `<p>${data.summary||''}</p>`)}
+              ${section('Perfil Profissional', `<p>${d.summary||''}</p>`)}
               ${section('Experiência Profissional', expHtml('mb-4'))}
               ${section('Formação Acadêmica', eduHtml('mb-4'))}
+              ${section('Projetos', projsHtml)}
             </main>
           </div>`; break;
 
@@ -510,37 +516,40 @@
           html = `
           <div class="p-10 text-gray-800 bg-white text-sm">
             <div class="text-center pb-6 border-b-2 ${theme.border}">
-              <h1 class="text-5xl font-bold tracking-tight">${data.name||''}</h1>
-              <p class="text-xl ${theme.text} mt-2 font-bold">${data.role||''}</p>
+              <h1 class="text-5xl font-bold tracking-tight">${d.name||''}</h1>
+              <p class="text-xl ${theme.text} mt-2 font-bold">${d.role||''}</p>
             </div>
             <div class="flex justify-center text-xs space-x-4 py-3 text-gray-600">
-              ${(data.email && `<span>${data.email}</span>`)||''}
-              ${(data.phone && `<span>• ${data.phone}</span>`)||''}
-              ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
-              ${(data.location && `<span>• ${data.location}</span>`)||''}
+              ${(d.email && `<span>${d.email}</span>`)||''}${(d.phone && `<span>• ${d.phone}</span>`)||''}
+              ${(d.linkedin && `<span>• ${d.linkedin}</span>`)||''}${(d.location && `<span>• ${d.location}</span>`)||''}
             </div>
-            ${section('Resumo', `<p class="text-center max-w-2xl mx-auto">${data.summary||''}</p>`)}
+            ${section('Resumo', `<p class="text-center max-w-2xl mx-auto">${d.summary||''}</p>`)}
             ${section('Experiência', expHtml('mb-4'))}
             ${section('Formação', eduHtml('mb-4'))}
-            ${section('Habilidades', skillsHtml)}
+            <div class="grid grid-cols-2 gap-8">
+              ${section('Habilidades', skillsHtml)} ${section('Idiomas', langsHtml)}
+            </div>
+            ${section('Certificações', certsHtml)}
+            ${section('Projetos', projsHtml)}
           </div>`; break;
 
         case 'timeline':
           html = `
           <div class="p-10 bg-white text-sm">
             <header class="relative text-center pb-8 mb-8">
-              <h1 class="text-4xl font-bold text-gray-800">${data.name||''}</h1>
-              <p class="text-lg font-bold ${theme.text} mt-1">${data.role||''}</p>
+              <h1 class="text-4xl font-bold text-gray-800">${d.name||''}</h1>
+              <p class="text-lg font-bold ${theme.text} mt-1">${d.role||''}</p>
               <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-0.5 ${theme.bg}"></div>
             </header>
             <div class="grid grid-cols-3 gap-8">
               <div class="col-span-1">
-                ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`)}
+                ${section('Contato', `<p>${d.email||''}</p><p>${d.phone||''}</p><p>${d.linkedin||''}</p><p>${d.location||''}</p>`)}
                 ${section('Habilidades', skillsHtml)}
+                ${section('Idiomas', langsHtml)}
               </div>
               <div class="col-span-2">
-                ${section('Perfil', `<p>${data.summary||''}</p>`)}
-                ${section('Experiência', (data.experience||[]).map(exp=>`
+                ${section('Perfil', `<p>${d.summary||''}</p>`)}
+                ${section('Experiência', (d.experience||[]).map(exp=>`
                     <div class="mb-4 relative pl-6" style="page-break-inside: avoid;">
                       <div class="absolute left-0 top-1.5 h-full w-0.5 ${theme.bg} opacity-30"></div>
                       <div class="absolute -left-1 top-1.5 w-3 h-3 rounded-full ${theme.bg}"></div>
@@ -549,29 +558,34 @@
                       <p class="text-xs text-gray-600 mt-1">${exp.description||''}</p>
                     </div>`).join(''))}
                 ${section('Formação', eduHtml())}
+                ${section('Certificações', certsHtml)}
+                ${section('Projetos', projsHtml)}
               </div>
             </div>
           </div>`; break;
 
         case 'creative': {
-          const photo = data.photo
-            ? `<img src="${data.photo}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-md" alt="Foto">`
+          const photo = d.photo
+            ? `<img src="${d.photo}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-md" alt="Foto">`
             : `<div class="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center text-gray-500 text-xs p-2">Selecione uma foto</div>`;
           html = `
           <div class="p-10 bg-white text-gray-800 text-sm">
             <div class="grid grid-cols-12 gap-8">
               <aside class="col-span-4">
                 ${photo}
-                ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Contato', `<p>${d.email||''}</p><p>${d.phone||''}</p><p>${d.linkedin||''}</p><p>${d.location||''}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
                 ${section('Habilidades', skillsHtml, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Idiomas', langsHtml, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
               </aside>
               <main class="col-span-8">
-                <h1 class="text-5xl font-bold">${data.name||''}</h1>
-                <p class="text-xl font-bold text-gray-500 mt-1">${data.role||''}</p>
+                <h1 class="text-5xl font-bold">${d.name||''}</h1>
+                <p class="text-xl font-bold text-gray-500 mt-1">${d.role||''}</p>
                 <div class="w-full h-1 ${theme.bg} my-4"></div>
-                ${section('Perfil', `<p>${data.summary||''}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Perfil', `<p>${d.summary||''}</p>`, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
                 ${section('Experiência', expHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
                 ${section('Formação', eduHtml('mb-4'), `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Certificações', certsHtml, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
+                ${section('Projetos', projsHtml, `text-sm font-bold ${theme.text} tracking-wider uppercase`)}
               </main>
             </div>
           </div>`; break;
@@ -583,40 +597,43 @@
           <div class="p-8 text-gray-800 bg-gray-50 text-sm">
             <div class="grid grid-cols-12 gap-8">
               <div class="col-span-8 border-r pr-8 border-gray-200">
-                <h1 class="text-4xl font-bold">${data.name||''}</h1>
-                <p class="text-lg font-bold ${theme.text} mt-1">${data.role||''}</p>
-                ${section('Resumo Profissional', `<p>${data.summary||''}</p>`)}
+                <h1 class="text-4xl font-bold">${d.name||''}</h1>
+                <p class="text-lg font-bold ${theme.text} mt-1">${d.role||''}</p>
+                ${section('Resumo Profissional', `<p>${d.summary||''}</p>`)}
                 ${section('Experiência', expHtml('mb-4'))}
+                ${section('Projetos', projsHtml)}
               </div>
               <aside class="col-span-4">
-                ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`)}
+                ${section('Contato', `<p>${d.email||''}</p><p>${d.phone||''}</p><p>${d.linkedin||''}</p><p>${d.location||''}</p>`)}
                 ${section('Formação', eduHtml('mb-2'))}
                 ${section('Habilidades', skillsHtml)}
+                ${section('Idiomas', langsHtml)}
+                ${section('Certificações', certsHtml)}
               </aside>
             </div>
           </div>`; break;
 
-        /* ----------- NOVOS 5 ----------- */
+        /* ---- 5 NOVOS ---- */
         case 'elegant':
           html = `
           <div class="p-10 bg-white text-gray-800 text-sm">
             <div class="flex items-start gap-4 mb-6">
               <div class="w-1.5 h-16 ${theme.bg} rounded"></div>
               <div>
-                <h1 class="text-4xl font-bold">${data.name||''}</h1>
-                <p class="text-lg ${theme.text} font-bold mt-1">${data.role||''}</p>
+                <h1 class="text-4xl font-bold">${d.name||''}</h1>
+                <p class="text-lg ${theme.text} font-bold mt-1">${d.role||''}</p>
                 <div class="text-xs mt-2 text-gray-600 space-x-2">
-                  ${(data.email && `<span>${data.email}</span>`)||''}
-                  ${(data.phone && `<span>• ${data.phone}</span>`)||''}
-                  ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
-                  ${(data.location && `<span>• ${data.location}</span>`)||''}
+                  ${(d.email && `<span>${d.email}</span>`)||''}
+                  ${(d.phone && `<span>• ${d.phone}</span>`)||''}
+                  ${(d.linkedin && `<span>• ${d.linkedin}</span>`)||''}
+                  ${(d.location && `<span>• ${d.location}</span>`)||''}
                 </div>
               </div>
             </div>
-            ${section('Resumo', `<p>${data.summary||''}</p>`)}
+            ${section('Resumo', `<p>${d.summary||''}</p>`)}
             <div class="grid grid-cols-2 gap-8">
-              <div>${section('Experiência', expHtml('mb-4'))}</div>
-              <div>${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}</div>
+              <div>${section('Experiência', expHtml('mb-4'))}${section('Projetos', projsHtml)}</div>
+              <div>${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}${section('Idiomas', langsHtml)}${section('Certificações', certsHtml)}</div>
             </div>
           </div>`; break;
 
@@ -624,76 +641,79 @@
           html = `
           <div class="bg-white text-sm">
             <div class="${theme.bg} text-white p-8">
-              <h1 class="text-4xl font-bold">${data.name||''}</h1>
-              <p class="text-lg font-semibold opacity-90 mt-1">${data.role||''}</p>
+              <h1 class="text-4xl font-bold">${d.name||''}</h1>
+              <p class="text-lg font-semibold opacity-90 mt-1">${d.role||''}</p>
               <div class="text-xs mt-2 opacity-90 space-x-2">
-                ${(data.email && `<span>${data.email}</span>`)||''}
-                ${(data.phone && `<span>• ${data.phone}</span>`)||''}
-                ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
-                ${(data.location && `<span>• ${data.location}</span>`)||''}
+                ${(d.email && `<span>${d.email}</span>`)||''}
+                ${(d.phone && `<span>• ${d.phone}</span>`)||''}
+                ${(d.linkedin && `<span>• ${d.linkedin}</span>`)||''}
+                ${(d.location && `<span>• ${d.location}</span>`)||''}
               </div>
             </div>
             <div class="p-8 text-gray-800">
-              ${section('Resumo', `<p>${data.summary||''}</p>`)}
+              ${section('Resumo', `<p>${d.summary||''}</p>`)}
               <div class="grid grid-cols-3 gap-8">
-                <div class="col-span-2">${section('Experiência', expHtml('mb-4'))}</div>
-                <aside class="col-span-1">${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}</aside>
+                <div class="col-span-2">${section('Experiência', expHtml('mb-4'))}${section('Projetos', projsHtml)}</div>
+                <aside class="col-span-1">${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}${section('Idiomas', langsHtml)}${section('Certificações', certsHtml)}</aside>
               </div>
             </div>
           </div>`; break;
 
         case 'photoLeft': {
-          const photo = data.photo
-            ? `<img src="${data.photo}" class="w-36 h-36 rounded-lg object-cover border-4 border-white shadow" alt="Foto">`
+          const photo = d.photo
+            ? `<img src="${d.photo}" class="w-36 h-36 rounded-lg object-cover border-4 border-white shadow" alt="Foto">`
             : `<div class="w-36 h-36 rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 text-xs p-2">Adicione uma foto</div>`;
           html = `
           <div class="flex h-full text-sm bg-white text-gray-800">
             <aside class="w-1/3 p-8 border-r border-gray-200">
               <div class="mb-4 flex justify-center">${photo}</div>
-              ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`)}
+              ${section('Contato', `<p>${d.email||''}</p><p>${d.phone||''}</p><p>${d.linkedin||''}</p><p>${d.location||''}</p>`)}
               ${section('Habilidades', skillsHtml)}
+              ${section('Idiomas', langsHtml)}
+              ${section('Certificações', certsHtml)}
             </aside>
             <main class="w-2/3 p-8">
-              <h1 class="text-4xl font-bold">${data.name||''}</h1>
-              <p class="text-lg ${theme.text} font-bold mt-1">${data.role||''}</p>
+              <h1 class="text-4xl font-bold">${d.name||''}</h1>
+              <p class="text-lg ${theme.text} font-bold mt-1">${d.role||''}</p>
               <div class="w-16 h-1 ${theme.bg} my-4"></div>
-              ${section('Resumo', `<p>${data.summary||''}</p>`)}
+              ${section('Resumo', `<p>${d.summary||''}</p>`)}
               ${section('Experiência', expHtml('mb-4'))}
               ${section('Formação', eduHtml('mb-4'))}
+              ${section('Projetos', projsHtml)}
             </main>
           </div>`; break;
         }
 
         case 'photoHeader': {
-          const photo = data.photo
-            ? `<img src="${data.photo}" class="w-28 h-28 rounded-full object-cover border-4 ${theme.border} shadow" alt="Foto">`
+          const photo = d.photo
+            ? `<img src="${d.photo}" class="w-28 h-28 rounded-full object-cover border-4 ${theme.border} shadow" alt="Foto">`
             : `<div class="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs p-2">Foto</div>`;
           html = `
           <div class="p-10 bg-white text-gray-800 text-sm">
             <header class="flex items-center justify-between border-b pb-6 mb-6">
               <div>
-                <h1 class="text-4xl font-bold">${data.name||''}</h1>
-                <p class="text-lg ${theme.text} font-bold mt-1">${data.role||''}</p>
+                <h1 class="text-4xl font-bold">${d.name||''}</h1>
+                <p class="text-lg ${theme.text} font-bold mt-1">${d.role||''}</p>
                 <div class="text-xs mt-2 text-gray-600 space-x-2">
-                  ${(data.email && `<span>${data.email}</span>`)||''}
-                  ${(data.phone && `<span>• ${data.phone}</span>`)||''}
-                  ${(data.linkedin && `<span>• ${data.linkedin}</span>`)||''}
-                  ${(data.location && `<span>• ${data.location}</span>`)||''}
+                  ${(d.email && `<span>${d.email}</span>`)||''}
+                  ${(d.phone && `<span>• ${d.phone}</span>`)||''}
+                  ${(d.linkedin && `<span>• ${d.linkedin}</span>`)||''}
+                  ${(d.location && `<span>• ${d.location}</span>`)||''}
                 </div>
               </div>
               <div class="shrink-0">${photo}</div>
             </header>
-            ${section('Resumo', `<p>${data.summary||''}</p>`)}
+            ${section('Resumo', `<p>${d.summary||''}</p>`)}
             <div class="grid grid-cols-3 gap-8">
-              <div class="col-span-2">${section('Experiência', expHtml('mb-4'))}</div>
-              <aside class="col-span-1">${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}</aside>
+              <div class="col-span-2">${section('Experiência', expHtml('mb-4'))}${section('Projetos', projsHtml)}</div>
+              <aside class="col-span-1">${section('Formação', eduHtml('mb-4'))}${section('Habilidades', skillsHtml)}${section('Idiomas', langsHtml)}${section('Certificações', certsHtml)}</aside>
             </div>
           </div>`; break;
         }
 
         case 'photoCard': {
-          const photo = data.photo
-            ? `<img src="${data.photo}" class="w-full aspect-square object-cover rounded-lg border ${theme.border}" alt="Foto">`
+          const photo = d.photo
+            ? `<img src="${d.photo}" class="w-full aspect-square object-cover rounded-lg border ${theme.border}" alt="Foto">`
             : `<div class="w-full aspect-square rounded-lg bg-gray-200 flex items-center justify-center text-gray-500 text-xs p-2">Foto opcional</div>`;
           html = `
           <div class="p-8 bg-white text-gray-800 text-sm">
@@ -701,17 +721,20 @@
               <aside class="col-span-4">
                 <div class="p-4 border rounded-lg">
                   ${photo}
-                  <h1 class="text-2xl font-bold mt-4">${data.name||''}</h1>
-                  <p class="${theme.text} font-bold">${data.role||''}</p>
+                  <h1 class="text-2xl font-bold mt-4">${d.name||''}</h1>
+                  <p class="${theme.text} font-bold">${d.role||''}</p>
                   <div class="h-0.5 ${theme.bg} my-4"></div>
-                  ${section('Contato', `<p>${data.email||''}</p><p>${data.phone||''}</p><p>${data.linkedin||''}</p><p>${data.location||''}</p>`, `text-xs font-bold ${theme.text} tracking-wider uppercase`)}
+                  ${section('Contato', `<p>${d.email||''}</p><p>${d.phone||''}</p><p>${d.linkedin||''}</p><p>${d.location||''}</p>`, `text-xs font-bold ${theme.text} tracking-wider uppercase`)}
                   ${section('Habilidades', skillsHtml, `text-xs font-bold ${theme.text} tracking-wider uppercase`)}
+                  ${section('Idiomas', langsHtml, `text-xs font-bold ${theme.text} tracking-wider uppercase`)}
                 </div>
               </aside>
               <main class="col-span-8">
-                ${section('Resumo', `<p>${data.summary||''}</p>`)}
+                ${section('Resumo', `<p>${d.summary||''}</p>`)}
                 ${section('Experiência', expHtml('mb-4'))}
                 ${section('Formação', eduHtml('mb-4'))}
+                ${section('Certificações', certsHtml)}
+                ${section('Projetos', projsHtml)}
               </main>
             </div>
           </div>`; break;
@@ -721,94 +744,84 @@
       previewArea.innerHTML = html;
     }
 
-   <!-- -------------- PDF CORRIGIDO (VERSÃO FINAL ESCALA REAL + MULTIPÁGINA) -------------- -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('download-pdf-btn');
-  const { jsPDF } = window.jspdf;
+    /* -------------- PDF (A4 retrato, escala correta, páginas automáticas) -------------- */
+    function setupPDF(){
+      const btn = document.getElementById('download-pdf-btn');
+      const { jsPDF } = window.jspdf;
 
-  btn.addEventListener('click', async () => {
-    const cv = document.getElementById('cv-preview-area');
-    const original = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = 'Gerando...';
+      btn.addEventListener('click', async ()=>{
+        const cv = document.getElementById('cv-preview-area');
+        const original = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = 'Gerando...';
 
-    // Calcula dimensões reais do conteúdo (em pixels)
-    const contentWidth = cv.scrollWidth;
-    const contentHeight = cv.scrollHeight;
+        try {
+          // Captura o canvas com escala reduzida para texto legível
+          const canvas = await html2canvas(cv, {
+            scale: 2, // Escala de 2 para qualidade sem aumentar muito o tamanho
+            useCORS: true,
+            logging: false,
+            windowWidth: cv.scrollWidth,
+            windowHeight: cv.scrollHeight
+          });
 
-    // Configura doc A4
-    const pdf = new jsPDF({
-      orientation: 'p',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    });
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF({ orientation:'p', unit:'mm', format:'a4', compress:true });
+          
+          // Dimensões A4 em mm
+          const pageWidth = 210;
+          const pageHeight = 297;
+          const margin = 10;
+          const contentWidth = pageWidth - (margin * 2);
+          
+          // Calcula altura proporcional da imagem
+          const imgWidth = canvas.width;
+          const imgHeight = canvas.height;
+          const ratio = imgHeight / imgWidth;
+          const contentHeight = contentWidth * ratio;
+          
+          // Calcula quantas páginas são necessárias
+          const totalPages = Math.ceil(contentHeight / (pageHeight - margin * 2));
+          
+          // Adiciona o conteúdo página por página
+          for (let page = 0; page < totalPages; page++) {
+            if (page > 0) pdf.addPage();
+            
+            const yOffset = -(page * (pageHeight - margin * 2));
+            pdf.addImage(imgData, 'PNG', margin, yOffset + margin, contentWidth, contentHeight);
+          }
 
-    // Escala de conversão px → mm (ajuste fino para texto real)
-    const pxToMm = 0.264583;
-    const pageWidth = 210;
-    const margin = 10;
-    const usableWidth = pageWidth - margin * 2;
-
-    await pdf.html(cv, {
-      callback: (doc) => {
-        const nome = (formData.name || 'curriculo').replace(/\s+/g, '_');
-        const pages = doc.internal.getNumberOfPages();
-        if (pages > 5)
-          alert('O currículo é muito extenso. O PDF foi limitado a 5 páginas.');
-        doc.save(`${nome}_curriculo.pdf`);
-        btn.innerHTML = original;
-        btn.disabled = false;
-      },
-      x: margin,
-      y: margin,
-      width: usableWidth,
-      windowWidth: contentWidth,
-      autoPaging: 'text',
-      html2canvas: {
-        scale: 0.9, // 🔧 Escala ideal (mantém fonte proporcional ao preview)
-        useCORS: true,
-        scrollX: 0,
-        scrollY: 0,
-        width: contentWidth,
-        height: contentHeight,
-      },
-      margin: [margin, margin, margin, margin],
-    });
-  });
-});
-</script>
-
+          const name = (formData.name||'curriculo').replace(/\s+/g,'_');
+          pdf.save(`${name}_curriculo.pdf`);
+        } catch (error) {
+          console.error('Erro ao gerar PDF:', error);
+          alert('Erro ao gerar PDF. Tente novamente.');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = original;
+        }
+      });
+    }
 
     /* -------------- INIT -------------- */
     document.addEventListener('DOMContentLoaded', ()=>{
-      loadState();
-
-      // Stepper inicial
+      // Stepper
       updateStepper();
 
-      // Template cards com mini‑prévia + badge "Foto"
+      // Templates
       templates.forEach(t=>{
         const card = document.createElement('div');
-        card.className = 'template-selector-card rounded-xl p-3';
+        card.className = 'template-selector-card';
         card.dataset.templateId = t.id;
-
         card.innerHTML = `
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm text-gray-200">${t.name}</span>
-            ${t.photo ? '<span class="badge bg-blue-600/30 text-blue-200 border border-blue-500/30">Foto</span>' : ''}
+            ${t.photo ? '<span class="text-xs px-2 py-0.5 rounded bg-blue-600/30 text-blue-200 border border-blue-500/30">Foto</span>' : ''}
           </div>
-          <div class="thumb">
-            <div class="title"></div>
-            <div class="bar"></div>
-            <div class="bar" style="width:85%"></div>
-            <div class="rule"></div>
-            <div class="bar" style="width:70%"></div>
-            <div class="bar" style="width:60%"></div>
-            <div class="chip"></div>
-          </div>
-        `;
+          <div class="bg-[#0b1528] rounded p-2">
+            <div class="h-2 bg-[#334155] rounded mb-1"></div>
+            <div class="h-2 bg-[#1f2937] rounded mb-1"></div>
+            <div class="h-2 w-2/3 bg-[#1f2937] rounded"></div>
+          </div>`;
         card.addEventListener('click', ()=>{
           document.querySelectorAll('.template-selector-card').forEach(c=>c.classList.remove('selected'));
           card.classList.add('selected'); selectedTemplate = t.id; renderCV();
@@ -816,12 +829,11 @@ document.addEventListener('DOMContentLoaded', () => {
         templateSelector.appendChild(card);
       });
 
-      // Color dots
+      // Cores
       Object.keys(colors).forEach(c=>{
         const dot = document.createElement('button');
-        dot.className = `color-selector-dot w-9 h-9 rounded-full ${colors[c].bg}`;
-        dot.title = c;
-        dot.dataset.colorId = c;
+        dot.className = `color-selector-dot ${colors[c].bg}`;
+        dot.title = c; dot.dataset.colorId = c;
         dot.addEventListener('click', ()=>{
           document.querySelectorAll('.color-selector-dot').forEach(d=>d.classList.remove('selected'));
           dot.classList.add('selected'); selectedColor = c; renderCV();
@@ -833,13 +845,17 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelector(`.template-selector-card[data-template-id="${selectedTemplate}"]`)?.classList.add('selected');
       document.querySelector(`.color-selector-dot[data-color-id="${selectedColor}"]`)?.classList.add('selected');
 
-      // Form listeners
+      // Listeners do formulário e botões dinâmicos
       form.addEventListener('input', renderCV);
       document.getElementById('add-experience').addEventListener('click', ()=> addDynamicEntry('experience'));
       document.getElementById('add-education').addEventListener('click', ()=> addDynamicEntry('education'));
+      document.getElementById('add-language').addEventListener('click', ()=> addDynamicEntry('languages'));
+      document.getElementById('add-certification').addEventListener('click', ()=> addDynamicEntry('certifications'));
+      document.getElementById('add-project').addEventListener('click', ()=> addDynamicEntry('projects'));
       document.getElementById('photo').addEventListener('change', handlePhotoUpload);
 
-      populateForm(); showScreen('home-screen');
+      // Carrega estado salvo e renderiza
+      loadState(); populateForm(); renderCV(); setupPDF();
     });
   </script>
 </body>
