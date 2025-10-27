@@ -200,7 +200,7 @@
             <button onclick="fillSampleData()" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Preencher Exemplo</button>
             <button onclick="resetData()" class="w-full px-4 py-3 rounded-xl border border-white/15 hover:bg-white/10">Limpar Dados</button>
           </div>
-          <p class="text-xs text-gray-400 mt-4">Dica: elementos longos evitam quebra no meio; a exportação suporta até 5 páginas.</p>
+          <p class="text-xs text-gray-400 mt-4">Dica: o PDF será gerado com as páginas necessárias automaticamente.</p>
         </aside>
 
         <!-- Preview -->
@@ -744,70 +744,58 @@
       previewArea.innerHTML = html;
     }
 
-    /* -------------- PDF (A4 retrato, escala correta, páginas automáticas) -------------- */
-    function setupPDF(){
-      const btn = document.getElementById('download-pdf-btn');
-      const { jsPDF } = window.jspdf;
+    /* -------------- PDF (A4 com recorte correto por página) -------------- */
+function setupPDF() {
+    const btn = document.getElementById('download-pdf-btn');
+    const { jsPDF } = window.jspdf;
 
-      btn.addEventListener('click', async ()=>{
+    btn.addEventListener('click', async () => {
         const cv = document.getElementById('cv-preview-area');
         const original = btn.innerHTML;
-        btn.disabled = true; btn.innerHTML = 'Gerando...';
+        btn.disabled = true;
+        btn.innerHTML = 'Gerando...';
 
         try {
-          // Captura o canvas com escala reduzida para texto legível
-          const canvas = await html2canvas(cv, {
-            scale: 2, // Escala de 2 para qualidade sem aumentar muito o tamanho
-            useCORS: true,
-            logging: false,
-            windowWidth: cv.scrollWidth,
-            windowHeight: cv.scrollHeight
-          });
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4',
+                putOnlyUsedFonts: true, // Otimização
+                compress: true,        // Otimização
+            });
 
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF({ orientation:'p', unit:'mm', format:'a4', compress:true });
-          
-          // Dimensões A4 em mm
-          const pageWidth = 210;
-          const pageHeight = 297;
-          const margin = 10;
-          const contentWidth = pageWidth - (margin * 2);
-          
-          // Calcula altura proporcional da imagem
-          const imgWidth = canvas.width;
-          const imgHeight = canvas.height;
-          const ratio = imgHeight / imgWidth;
-          const contentHeight = contentWidth * ratio;
-          
-          // Calcula quantas páginas são necessárias
-          const totalPages = Math.ceil(contentHeight / (pageHeight - margin * 2));
-          
-          // Adiciona o conteúdo página por página
-          for (let page = 0; page < totalPages; page++) {
-            if (page > 0) pdf.addPage();
-            
-            const yOffset = -(page * (pageHeight - margin * 2));
-            pdf.addImage(imgData, 'PNG', margin, yOffset + margin, contentWidth, contentHeight);
-          }
+            await pdf.html(cv, {
+                callback: function (pdf) {
+                    const name = (formData.name || 'curriculo').replace(/\s+/g, '_');
+                    pdf.save(`${name}_curriculo.pdf`);
+                },
+                // Margens para o conteúdo dentro do PDF
+                margin: [10, 10, 10, 10], // [top, right, bottom, left]
 
-          const name = (formData.name||'curriculo').replace(/\s+/g,'_');
-          pdf.save(`${name}_curriculo.pdf`);
+                // A MÁGICA ACONTECE AQUI!
+                // Esta opção instrui o jsPDF a quebrar a página de forma inteligente,
+                // tentando não cortar o texto no meio.
+                autoPaging: 'text',
+
+                // Largura do HTML dentro do PDF (A4 tem 210mm, com margens de 10mm de cada lado)
+                width: 190,
+                windowWidth: cv.scrollWidth, // Usa a largura real do elemento para renderizar
+            });
+
         } catch (error) {
-          console.error('Erro ao gerar PDF:', error);
-          alert('Erro ao gerar PDF. Tente novamente.');
+            console.error('Erro ao gerar PDF:', error);
+            alert('Erro ao gerar PDF. Tente novamente.');
         } finally {
-          btn.disabled = false;
-          btn.innerHTML = original;
+            btn.disabled = false;
+            btn.innerHTML = original;
         }
-      });
-    }
+    });
+}
 
     /* -------------- INIT -------------- */
     document.addEventListener('DOMContentLoaded', ()=>{
-      // Stepper
       updateStepper();
 
-      // Templates
       templates.forEach(t=>{
         const card = document.createElement('div');
         card.className = 'template-selector-card';
@@ -829,7 +817,6 @@
         templateSelector.appendChild(card);
       });
 
-      // Cores
       Object.keys(colors).forEach(c=>{
         const dot = document.createElement('button');
         dot.className = `color-selector-dot ${colors[c].bg}`;
@@ -841,11 +828,9 @@
         colorSelector.appendChild(dot);
       });
 
-      // Seleções padrão
       document.querySelector(`.template-selector-card[data-template-id="${selectedTemplate}"]`)?.classList.add('selected');
       document.querySelector(`.color-selector-dot[data-color-id="${selectedColor}"]`)?.classList.add('selected');
 
-      // Listeners do formulário e botões dinâmicos
       form.addEventListener('input', renderCV);
       document.getElementById('add-experience').addEventListener('click', ()=> addDynamicEntry('experience'));
       document.getElementById('add-education').addEventListener('click', ()=> addDynamicEntry('education'));
@@ -854,7 +839,6 @@
       document.getElementById('add-project').addEventListener('click', ()=> addDynamicEntry('projects'));
       document.getElementById('photo').addEventListener('change', handlePhotoUpload);
 
-      // Carrega estado salvo e renderiza
       loadState(); populateForm(); renderCV(); setupPDF();
     });
   </script>
